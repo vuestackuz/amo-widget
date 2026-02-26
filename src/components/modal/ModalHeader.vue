@@ -20,7 +20,7 @@ import { widgetPath } from '../../utils/media_path';
 const helpersStore = useHelpersStore()
 const sipUserStore = useUtelSipUserStore()
 
-const imgLoading = ref("icons/spin.svg");
+const imgLoading = ref("./src/assets/icons/spin.svg");
 
 onMounted(() => {
   imgLoading.value = widgetPath(imgLoading.value)

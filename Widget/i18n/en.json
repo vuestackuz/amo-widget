@@ -1,13 +1,18 @@
 {
     "widget":{
-        "name":"Vue Widget Template",
-        "short_description":"Short description",
-        "description":"Full description"
+        "name":"Utel",
+        "short_description":"Integration with Utel",
+        "description":"Integration with Utel",
+        "tour_description":"Welcome to Utel integration"
     },
     "settings":{
-        "login":"User login",
-        "api_key":"API key",
-        "account":"Account",
-        "try_free": "Try for free"
+        "domain": "Domain",
+        "token": "Token"
+    },
+    "advanced":{
+        "title":"Settings menu item title"
+    },
+    "dp":{
+        "message": "Message"
     }
 }

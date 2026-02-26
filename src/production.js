@@ -13,11 +13,13 @@ import App from './App.vue';
 const Widget = {
     currnetArea: "",
     appElement: "",
-    render() {
+    render(widget) {
         const appElement = document.createElement('div');
         appElement.setAttribute('id', 'app');
         this.appElement = appElement;
         console.log('render callback');
+        window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
+        window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
         return true;
     },
     init(widget) {

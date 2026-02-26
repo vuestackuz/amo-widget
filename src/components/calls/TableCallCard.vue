@@ -76,18 +76,18 @@ const sipStore = useSipStore();
 const helpersStore = useHelpersStore()
 const props = defineProps(["session"]);
 
-const imgTransferToNumber = ref("icons/transfer-to-number.svg")
-const imgAcceptCall = ref("icons/accept-call.svg")
-const imgTransferCall = ref("icons/transfer-call.svg")
-const imgMicOn = ref("icons/mic-on.svg")
-const imgMicOff = ref("icons/mic-off.svg")
-const imgDial = ref("icons/dial.svg")
-const imgHold = ref("icons/hold.svg")
-const imgResume = ref("icons/resume.svg")
-const imgRejectCall = ref("icons/reject-call.svg")
-const imgIncoming = ref("icons/incoming.svg")
-const imgOutgoing = ref("icons/outgoing.svg")
-const imgAddContact = ref("icons/add-contact.svg")
+const imgTransferToNumber = ref("./src/assets/icons/transfer-to-number.svg")
+const imgAcceptCall = ref("./src/assets/icons/accept-call.svg")
+const imgTransferCall = ref("./src/assets/icons/transfer-call.svg")
+const imgMicOn = ref("./src/assets/icons/mic-on.svg")
+const imgMicOff = ref("./src/assets/icons/mic-off.svg")
+const imgDial = ref("./src/assets/icons/dial.svg")
+const imgHold = ref("./src/assets/icons/hold.svg")
+const imgResume = ref("./src/assets/icons/resume.svg")
+const imgRejectCall = ref("./src/assets/icons/reject-call.svg")
+const imgIncoming = ref("./src/assets/icons/incoming.svg")
+const imgOutgoing = ref("./src/assets/icons/outgoing.svg")
+const imgAddContact = ref("./src/assets/icons/add-contact.svg")
 
 async function newContact(phone, id) {
   const response = (await contactsStore.createContactIfMissing(phone)).contact

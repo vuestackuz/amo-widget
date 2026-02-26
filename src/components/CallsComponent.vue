@@ -25,7 +25,7 @@
 
 </template>
 
-<script setup lang="ts">
+<script setup lang="js">
 import { useSipStore } from '../../stores/js-sip/sipStore';
 import { useSipWSStore } from '../../stores/utel-api/utel-sip-ws';
 import CallCard from './calls/CallCard.vue'

@@ -1,13 +1,18 @@
 {
     "widget":{
-        "name":"Vue Widget",
-        "short_description":"Шаблон виджета на Vue.JS",
-        "description":"Шаблон виджета на Vue.JS"
+        "name":"Мой виджет",
+        "short_description":"Короткое описание виджета",
+        "description":"Полное описание виджета",
+        "tour_description":"Описание виджета"
     },
     "settings":{
-        "login":"Логин",
-        "api_key":"ключ API",
-        "account":"Аккаунт",
-        "try_free": "Попробовать бесплатно"
+        "domain": "Домен",
+        "token":"Токен"
+    },
+    "advanced":{
+        "title":"Заголовок меню в настройках"
+    },
+    "dp":{
+        "message": "Сообщение"
     }
 }

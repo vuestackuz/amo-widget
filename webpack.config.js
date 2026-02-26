@@ -24,6 +24,12 @@ module.exports = (env, argv) => {
                         loader: 'babel-loader',
                     },
                 },
+                // Vue SFC: <style lang="scss"> (and plain CSS) — needs sass-loader for SCSS
+                {
+                    test: /\.vue$/,
+                    resourceQuery: /type=style/,
+                    use: ['vue-style-loader', 'css-loader', 'sass-loader'],
+                },
                 {
                     test: /\.vue$/,
                     loader: 'vue-loader',
@@ -39,7 +45,7 @@ module.exports = (env, argv) => {
             alias: {
                 '@': path.resolve(__dirname, './src/components'),
             },
-            extensions: ['.js', '.vue'],
+            extensions: ['.js', '.ts', '.vue'],
         },
         plugins: [
             new VueLoaderPlugin(),

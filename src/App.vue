@@ -82,7 +82,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-#utel-widget {
+#app {
 
   // Font:
   --utel-widget-font-size: 16px;
