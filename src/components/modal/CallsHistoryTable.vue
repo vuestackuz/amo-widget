@@ -80,10 +80,10 @@ import { useUtelSipUserStore } from "../../../stores/utel-api/sipUser";
 import { useAmoCallsStore } from "../../../stores/amo-api/amo-calls";
 import logger from "../../composables/logger";
 
-const imgCallArrowIn = ref("./src/assets/icons/call_arrow_in.svg");
-const imgCallArrowOut = ref("./src/assets/icons/call_arrow_out.svg");
-const imgCallArrowInternal = ref("./src/assets/icons/call_arrow_internal.svg");
-const imgNumberCall = ref("./src/assets/icons/number-call.svg");
+const imgCallArrowIn = ref("icons/call_arrow_in.svg");
+const imgCallArrowOut = ref("icons/call_arrow_out.svg");
+const imgCallArrowInternal = ref("icons/call_arrow_internal.svg");
+const imgNumberCall = ref("icons/number-call.svg");
 
 const contactsStore = useContactsStore();
 const helpersStore = useHelpersStore();

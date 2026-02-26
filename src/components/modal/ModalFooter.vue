@@ -39,7 +39,7 @@ const globals = useGlobalsStore()
 const sipStore = useSipStore()
 const sipUserStore = useUtelSipUserStore()
 
-const imgNumberCall = ref("./src/assets/icons/number-call.svg")
+const imgNumberCall = ref("icons/number-call.svg")
 
 const callNumber = ref("")
 const input = ref(null)

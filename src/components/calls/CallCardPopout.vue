@@ -28,7 +28,7 @@ const callActions = useCallActionsStore()
 const targetNumber = ref("")
 const input = ref(null)
 
-const imgTransferToNumber = ref("./src/assets/icons/transfer-to-number.svg")
+const imgTransferToNumber = ref("icons/transfer-to-number.svg")
 
 function transferCall() {
   callActions.transferCall(props.session.raw, targetNumber.value, globals.mainDomain)
