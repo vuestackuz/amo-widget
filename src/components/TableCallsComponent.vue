@@ -19,6 +19,8 @@ import TableCallCard from './calls/TableCallCard.vue'
 const sipStore = useSipStore()
 const sipWSStore = useSipWSStore()
 
+console.log("sipStore.sessions", sipStore.sessions)
+console.log("sipWSStore.passiveCalls", sipWSStore.passiveCalls)
 </script>
 
 <style lang="scss" scoped>

@@ -14,6 +14,8 @@ const Widget = {
     currnetArea: "",
     appElement: "",
     render(widget) {
+        window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
+        window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
         const appElement = document.createElement('div');
         appElement.setAttribute('id', 'utel-widget-app');
         this.appElement = appElement;
@@ -25,8 +27,6 @@ const Widget = {
         app.use(pinia);
         window.vue = app;
         app.mount('#utel-widget-app');
-        // window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
-        // window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
         return true;
     },
     init(widget) {

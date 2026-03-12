@@ -20,10 +20,10 @@ define(['./app.js?cache=' + Date.now()], function (App) {
                 return true;
             },
             settings() {
-                App.default.settings(self);
+                return true;
             },
             onSave() {
-                App.default.onSave(self);
+                return true;
             },
             destroy() {
                 App.default.destroy(self);

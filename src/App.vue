@@ -49,6 +49,8 @@ const timer = setInterval(() => {
 }, 500)
 
 onMounted(async () => {
+  console.log("window settings", window.__AMO_UTEL_WIDGET_SETTINGS__)
+  console.log("window system", window.__AMO_UTEL_WIDGET_SYSTEM__)
   console.log("globals", globals.hostname, globals.settings?.token, globals.system?.amouser_id)
   if(globals.hostname !== null && globals.settings?.token && globals.system?.amouser_id ) {
     await sipUserStore.getSipUserInfo(globals.system?.amouser_id, globals.hostname, globals.settings?.token)
