@@ -1,89 +1,31 @@
-<template>
-  <UTeLButton />
-  <ModalView />
-  <CallsComponent />
+<script setup>
+import { ref } from 'vue';
+import ModalTriggerButton from './components/ModalTriggerButton.vue';
+import Panel from './components/panel/index.vue';
 
+const isModalOpen = ref(false);
+
+const toggleModal = () => {
+  isModalOpen.value = !isModalOpen.value;
+}
+</script>
+<template>
+  <ModalTriggerButton @open="toggleModal" />
+  <Panel v-if="isModalOpen" @close="toggleModal" />
 </template>
 
-<script setup>
-import { onBeforeUnmount, onMounted, onUnmounted, watch } from "vue";
-import { useGlobalsStore } from "../stores/globals";
-import ModalView from "./components/ModalView.vue";
-import UTeLButton from "./components/UTeLButton.vue";
-import CallsComponent from "./components/CallsComponent.vue";
-import { useUtelSipUserStore } from "../stores/utel-api/sipUser";
-import { useSipStore } from "../stores/js-sip/sipStore";
-import { useSipWSStore } from "../stores/utel-api/utel-sip-ws";
-import logger from "./composables/logger";
-
-const globals = useGlobalsStore()
-const sipStore = useSipStore()
-const sipUserStore = useUtelSipUserStore()
-const sipWSStore = useSipWSStore()
-
-// = Set Globals =
-
-// Try initial read for globals
-if (window.__AMO_UTEL_WIDGET_SETTINGS__) {
-  globals.settings = window.__AMO_UTEL_WIDGET_SETTINGS__
-}
-if (window.__AMO_UTEL_WIDGET_SYSTEM__) {
-  globals.system = window.__AMO_UTEL_WIDGET_SYSTEM__
-}
-
-// If they might appear later → poll or wait for event
-const checkGlobals = () => {
-  if (!globals.settings && window.__AMO_UTEL_WIDGET_SETTINGS__) {
-    globals.settings = window.__AMO_UTEL_WIDGET_SETTINGS__
-  }
-  if (!globals.system && window.__AMO_UTEL_WIDGET_SYSTEM__) {
-    globals.system = window.__AMO_UTEL_WIDGET_SYSTEM__
-  }
-}
-
-const timer = setInterval(() => {
-  checkGlobals()
-  if (globals.system && globals.settings) {
-    clearInterval(timer)
-  }
-}, 500)
-
-onMounted(async () => {
-  console.log("window settings", window.__AMO_UTEL_WIDGET_SETTINGS__)
-  console.log("window system", window.__AMO_UTEL_WIDGET_SYSTEM__)
-  console.log("globals", globals.hostname, globals.settings?.token, globals.system?.amouser_id)
-  if(globals.hostname !== null && globals.settings?.token && globals.system?.amouser_id ) {
-    await sipUserStore.getSipUserInfo(globals.system?.amouser_id, globals.hostname, globals.settings?.token)
-    if(sipUserStore.notConnectedSipUser === 2 && [1,2].includes(sipUserStore.noOtherSoftPhoneConnection)) {
-      logger.log("We got the Sip, initializing...");
-      sipStore.initSip(sipUserStore.sipUser.credential.username, sipUserStore.sipUser.credential.password, globals.hostname)
-    }
-  }
-  
-  // Listen for the beforeunload event for calling the alert about the ongoing calls
-  window.addEventListener('beforeunload', async (event) => {
-  if (sipStore.liveCalls) {
-      // put calls on hold
-      Object.values(sipStore.sessions).forEach(s => s.raw.hold())
-
-      // show confirmation
-      event.preventDefault()
-      event.returnValue = 'У вас есть текущие звонки!'
-    }
-  })
-
-})
-
-onBeforeUnmount(async () => {
-  sipStore.stopSip()
-})
-
-onUnmounted(() => {
-  clearInterval(timer)
-})
-</script>
 
 <style lang="scss">
+body {
+  font-size: var(--utel-widget-font-size);
+  font-family: "PT Sans", Arial, sans-serif;
+}
+*, *:before, *:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 #utel-widget-app {
 
   // Font:
@@ -113,10 +55,5 @@ onUnmounted(() => {
     contrast(101%);
   --utel-widget-icon-filter-red: invert(29%) sepia(44%) saturate(3526%) hue-rotate(325deg) brightness(101%)
     contrast(94%); 
-
-  * {
-    box-sizing: border-box;
-    font-size: var(--utel-widget-font-size);
-  }
 }
 </style>
