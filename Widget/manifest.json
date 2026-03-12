@@ -1,80 +1,82 @@
 {
     "widget": {
-        "name": "widget.name",
-        "description": "widget.description",
-        "short_description": "widget.short_description",
-        "version": "1.3.3",
-        "interface_version": 2,
-        "init_once": true,
-        "locale": [
-            "ru"
-        ],
-        "installation": true,
-        "support": {
-            "link": "https://www.hostmaster.uz",
-            "email": "olimjongofurov@gmail.com"
-        }
+      "name": "widget.name",
+      "description": "widget.description",
+      "short_description": "widget.short_description",
+      "version": "1.0.16",
+      "interface_version": 2,
+      "init_once": true,
+      "locale": [
+        "ru",
+        "en"
+      ],
+      "installation": true,
+      "support": {
+        "link": "https://www.hostmaster.uz",
+        "email": "olimjongofurov@gmail.com"
+      }
     },
     "locations": [
-    "everywhere"
-  ],
-  "tour": {
-    "is_tour": true,
-    "tour_images": {
-      "ru": [
-        "/images/logo_main.png",
-        "/images/logo_main.png",
-        "/images/logo_main.png"
-      ],
-      "en": [
-        "/images/logo_main.png",
-        "/images/logo_main.png",
-        "/images/logo_main.png"
-      ]
+      "everywhere"
+    ],
+    "tour": {
+      "is_tour": true,
+      "tour_images": {
+        "ru": [
+          "/images/logo_main.png",
+          "/images/logo_main.png",
+          "/images/logo_main.png"
+        ],
+        "en": [
+          "/images/logo_main.png",
+          "/images/logo_main.png",
+          "/images/logo_main.png"
+        ]
+      },
+      "tour_description": "widget.tour_description"
     },
-    "tour_description": "widget.tour_description"
-  },
-  "settings": {
-    "domain": {
-      "name": "settings.domain",
-      "type": "text",
-      "required": true
+    "settings": {
+      "domain": {
+        "name": "settings.domain",
+        "type": "text",
+        "required": true
+      },
+      "token": {
+        "name": "settings.token",
+        "type": "text",
+        "required": true
+      }
     },
-    "token": {
-      "name": "settings.token",
-      "type": "text",
-      "required": true
-    }
-  },
-  "salesbot_designer": {
-    "handler_code": {
-      "name": "salesbot.handler_name",
-      "settings": {
-        "button_title": {
-          "name": "salesbot.button_title",
-          "type": "text",
-          "default_value": "salesbot.button_title_default_value",
-          "manual": true
-        },
-        "button_caption": {
-          "name": "salesbot.button_caption",
-          "type": "text",
-          "default_value": "salesbot.button_caption_default_value",
-          "manual": true
-        },
-        "text": {
-          "name": "salesbot.text",
-          "type": "text"
-        },
-        "number": {
-          "name": "salesbot.number",
-          "type": "numeric"
-        },
-        "url": {
-          "name": "salesbot.url",
-          "type": "url"
+    "salesbot_designer": {
+      "handler_code": {
+        "name": "salesbot.handler_name",
+        "settings": {
+          "button_title": {
+            "name": "salesbot.button_title",
+            "type": "text",
+            "default_value": "salesbot.button_title_default_value",
+            "manual": true
+          },
+          "button_caption": {
+            "name": "salesbot.button_caption",
+            "type": "text",
+            "default_value": "salesbot.button_caption_default_value",
+            "manual": true
+          },
+          "text": {
+            "name": "salesbot.text",
+            "type": "text"
+          },
+          "number": {
+            "name": "salesbot.number",
+            "type": "numeric"
+          },
+          "url": {
+            "name": "salesbot.url",
+            "type": "url"
+          }
         }
       }
     }
   }
-}
+  

@@ -15,11 +15,18 @@ const Widget = {
     appElement: "",
     render(widget) {
         const appElement = document.createElement('div');
-        appElement.setAttribute('id', 'app');
+        appElement.setAttribute('id', 'utel-widget-app');
         this.appElement = appElement;
-        console.log('render callback');
-        window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
-        window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
+        console.log('render callback', widget.get_settings());
+        const container = $("body");
+        $(container).append(this.appElement);
+        const pinia = createPinia();
+        const app = createApp(App);
+        app.use(pinia);
+        window.vue = app;
+        app.mount('#utel-widget-app');
+        // window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
+        // window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
         return true;
     },
     init(widget) {
@@ -32,17 +39,10 @@ const Widget = {
         return true;
     },
     settings(widget) {
-        const container = $(".widget-settings .widget_settings_block");
-        $(container).html(this.appElement);
-        const pinia = createPinia();
-        const app = createApp(App);
-        app.use(pinia);
-        window.vue = app;
-        app.mount('#app');
-        console.log('settings callback');
+        return true;
     },
     onSave(widget) {
-        console.log("save");
+        return true;
     },
     destroy(widget) {
         console.log("destroy");
