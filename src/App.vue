@@ -5,7 +5,6 @@ import Panel from './components/panel/index.vue';
 
 const isModalOpen = ref(false);
 
-// toggle modal
 const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
 }
