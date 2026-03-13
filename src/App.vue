@@ -5,6 +5,7 @@ import Panel from './components/panel/index.vue';
 
 const isModalOpen = ref(false);
 
+// toggle modal
 const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
 }
@@ -41,12 +42,12 @@ body {
   --utel-widget-text-color: hsl(0, 0%, 100%);
   --utel-widget-text-secondary: hsla(0, 0%, 100%, 0.8);
   --utel-widget-border-color: hsl(200, 5%, 57%);
-  
+
   --utel-red: #f73463;
   --utel-green: #43d1a7;
   --utel-blue: #008bf1;
 
-  // Icon recoloring filters: 
+  // Icon recoloring filters:
   --utel-widget-icon-filter: invert(100%);
   --utel-widget-icon-filter-green: invert(65%) sepia(91%) saturate(291%) hue-rotate(111deg) brightness(92%)
     contrast(88%);
@@ -54,6 +55,6 @@ body {
   --utel-widget-icon-filter-blue: invert(45%) sepia(42%) saturate(6863%) hue-rotate(185deg) brightness(99%)
     contrast(101%);
   --utel-widget-icon-filter-red: invert(29%) sepia(44%) saturate(3526%) hue-rotate(325deg) brightness(101%)
-    contrast(94%); 
+    contrast(94%);
 }
 </style>
