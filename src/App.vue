@@ -1,13 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
+import { useAmocrmStore } from './stores/amocrm.store';
+import { storeToRefs } from 'pinia';
 
+const amocrmStore = useAmocrmStore();
+const { fetchAmocrmInfo, isError } = storeToRefs(amocrmStore);
 const isModalOpen = ref(false);
 
 const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
 }
+
+onMounted(async () => {
+  await amocrmStore.fetchAmocrmInfo();
+})
 </script>
 <template>
   <ModalTriggerButton @open="toggleModal" />
@@ -18,7 +26,7 @@ const toggleModal = () => {
 <style lang="scss">
 body {
   font-size: var(--utel-widget-font-size);
-  font-family: "PT Sans", Arial, sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 *, *:before, *:after {
   box-sizing: border-box;
