@@ -2,15 +2,27 @@
 import CallInput from './CallInput.vue';
 import SipControlButton from './SipControlButton.vue';
 import CallControlPanel from '../calls/CallControlPanel.vue';
+import { useSipStore } from '../../../stores/sip.store';
 
-const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__.version;
+const sipStore = useSipStore();
+const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
 </script>
 
 <template>
     <div class="utel-widget-modal__footer">
         <CallInput />
-        <SipControlButton title="DND" label="Не беспокоить" />
-        <SipControlButton title="Multichannel" label="Многоканальность" />
+        <SipControlButton
+          title="DND"
+          label="Не беспокоить"
+          :model-value="sipStore.dnd"
+          @update:model-value="sipStore.setDND"
+        />
+        <SipControlButton
+          title="Multichannel"
+          label="Многоканальность"
+          :model-value="sipStore.multiChannel"
+          @update:model-value="sipStore.setMultiChannel"
+        />
         <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
     </div>
     <CallControlPanel />

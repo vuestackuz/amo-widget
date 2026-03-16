@@ -1,21 +1,20 @@
 <script setup>
-import { ref } from 'vue';
-
-const props = defineProps({
+defineProps({
   title: String,
   label: {
     type: String,
     required: true,
-  }
+  },
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['toggle']);
+const emit = defineEmits(['update:modelValue']);
 
-const isActive = ref(false);
-
-const toggle = () => {
-  isActive.value = !isActive.value;
-  emit('toggle', isActive.value);
+function toggle(current) {
+  emit('update:modelValue', !current);
 }
 </script>
 
@@ -23,8 +22,8 @@ const toggle = () => {
   <button
     :title="title"
     class="utel-widget-sip-control-button"
-    :class="{active: isActive}"
-    @click="toggle"
+    :class="{ active: modelValue }"
+    @click="toggle(modelValue)"
   >
     <slot>
       <span>{{ label }}</span>

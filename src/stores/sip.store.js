@@ -24,12 +24,10 @@ export const useSipStore = defineStore('sip', () => {
   // --- DND / MultiChannel ---
   function setDND(flag) {
     dnd.value = flag;
-    console.log(`[SIP] DND ${flag ? 'ON' : 'OFF'}`);
   }
 
   function setMultiChannel(flag) {
     multiChannel.value = flag;
-    console.log(`[SIP] MultiChannel ${flag ? 'ON' : 'OFF'}`);
   }
 
   // --- Init UA ---
@@ -37,7 +35,7 @@ export const useSipStore = defineStore('sip', () => {
     const { websocket, sipUser } = amocrmStore;
 
     if (!websocket || !sipUser?.credential) {
-      console.warn('[SIP] Missing websocket or sip credentials — skipping UA init');
+      console.warn('[SIP] Missing websocket or SIP credentials — skipping UA init');
       return;
     }
 
@@ -46,16 +44,16 @@ export const useSipStore = defineStore('sip', () => {
       ua = null;
     }
 
-    // Build WebSocket URL: strip protocol from settings domain
-    // Port 443 is the default for WSS — omit it to avoid server rejection
-    const settingsDomain = window.__AMO_UTEL_WIDGET_SETTINGS__.domain;
+    const settingsDomain = window.__AMO_UTEL_WIDGET_SETTINGS__?.domain;
+    if (!settingsDomain) {
+      console.warn('[SIP] Widget settings domain not found — skipping UA init');
+      return;
+    }
+
     const host = settingsDomain.replace(/^https?:\/\//, '');
     const wsUrl = `wss://${host}:8089/ws/`;
-
     const username = sipUser.credential.username;
     const password = sipUser.credential.password;
-
-    console.log(`[SIP] Connecting — wsUrl: ${wsUrl} | uri: sip:${username}@${host}`);
 
     const socket = new JsSIP.WebSocketInterface(wsUrl);
 
@@ -68,16 +66,10 @@ export const useSipStore = defineStore('sip', () => {
       user_agent: 'AmoCRM-Widget',
     });
 
-    ua.on('connected', () => console.log('[SIP] Connected to SIP server.'));
-    ua.on('disconnected', () => console.log('[SIP] Disconnected from SIP server.'));
-    ua.on('registered', () => {
-      isRegistered.value = true;
-      console.log('[SIP] Registered.');
-    });
-    ua.on('unregistered', () => {
-      isRegistered.value = false;
-      console.log('[SIP] Unregistered.');
-    });
+    ua.on('connected', () => {});
+    ua.on('disconnected', () => {});
+    ua.on('registered', () => { isRegistered.value = true; });
+    ua.on('unregistered', () => { isRegistered.value = false; });
     ua.on('registrationFailed', (e) => {
       isRegistered.value = false;
       console.error('[SIP] Registration failed:', e.cause);
@@ -91,7 +83,6 @@ export const useSipStore = defineStore('sip', () => {
 
       // DND — reject before storing session
       if (originator === 'remote' && dnd.value) {
-        console.log(`[SIP] DND — rejecting call from ${session.remote_identity.uri.user}`);
         session.terminate({ status_code: 486, reason_phrase: 'Do Not Disturb' });
         return;
       }
@@ -126,18 +117,18 @@ export const useSipStore = defineStore('sip', () => {
 
       // Call duration timer
       sessions.value[id].timer = setInterval(() => {
-        sessions.value[id].duration = Math.floor(
-          (Date.now() - sessions.value[id].startTime.getTime()) / 1000
-        );
+        if (sessions.value[id]) {
+          sessions.value[id].duration = Math.floor(
+            (Date.now() - sessions.value[id].startTime.getTime()) / 1000
+          );
+        }
       }, 1000);
-
-      console.log(`[SIP] New session from ${originator}: ${session.remote_identity.uri.toString()}`);
 
       if (originator === 'remote') {
         playAudio(ringtone, true);
       }
 
-      // Attach remote audio track to a programmatic Audio node
+      // Attach remote audio track
       const remoteAudio = new Audio();
       function attachRemoteAudio() {
         const pc = session.connection;
@@ -151,12 +142,13 @@ export const useSipStore = defineStore('sip', () => {
       }
 
       function cleanupCall(cause = 'Unknown') {
-        console.log(`[SIP] Call ended — id=${id} cause=${cause}`);
         pauseAudio(ringtone);
         remoteAudio.srcObject = null;
+        remoteAudio.src = '';
         playAudio(callEndSound, false);
         if (sessions.value[id]?.timer) clearInterval(sessions.value[id].timer);
         delete sessions.value[id];
+        console.warn(`[SIP] Call ended — id=${id} cause=${cause}`);
       }
 
       session.on('accepted', () => {
@@ -171,27 +163,26 @@ export const useSipStore = defineStore('sip', () => {
       });
 
       session.on('ended', (data) => {
-        sessions.value[id].endTime = new Date();
+        if (sessions.value[id]) sessions.value[id].endTime = new Date();
         cleanupCall(data?.cause || 'ended');
       });
 
       session.on('failed', (data) => {
-        sessions.value[id].endTime = new Date();
+        if (sessions.value[id]) sessions.value[id].endTime = new Date();
         cleanupCall(data?.cause || 'failed');
       });
 
-      session.on('hold', () => { sessions.value[id].isOnHold = true; });
-      session.on('unhold', () => { sessions.value[id].isOnHold = false; });
-      session.on('remotehold', () => { sessions.value[id].isOnHold = true; });
-      session.on('remoteunhold', () => { sessions.value[id].isOnHold = false; });
-      session.on('muted', () => { sessions.value[id].isMuted = true; });
-      session.on('unmuted', () => { sessions.value[id].isMuted = false; });
+      session.on('hold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = true; });
+      session.on('unhold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = false; });
+      session.on('remotehold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = true; });
+      session.on('remoteunhold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = false; });
+      session.on('muted', () => { if (sessions.value[id]) sessions.value[id].isMuted = true; });
+      session.on('unmuted', () => { if (sessions.value[id]) sessions.value[id].isMuted = false; });
 
       session.on('referred', () => { delete sessions.value[id]; });
     });
 
     ua.start();
-    console.log('[SIP] UA started.');
   }
 
   // --- Stop UA ---
@@ -200,7 +191,6 @@ export const useSipStore = defineStore('sip', () => {
       ua.stop();
       ua = null;
     }
-    console.log('[SIP] UA stopped.');
   }
 
   // --- Outgoing call ---
@@ -221,9 +211,13 @@ export const useSipStore = defineStore('sip', () => {
       return null;
     }
 
-    const host = window.__AMO_UTEL_WIDGET_SETTINGS__.domain.replace(/^https?:\/\//, '');
-    const target = `sip:${targetNumber}@${host}`;
+    const host = window.__AMO_UTEL_WIDGET_SETTINGS__?.domain?.replace(/^https?:\/\//, '');
+    if (!host) {
+      console.warn('[SIP] Widget settings domain not found');
+      return null;
+    }
 
+    const target = `sip:${targetNumber}@${host}`;
     const { dialing: dialingSound, endCall: callEndSound } = audio;
 
     try {
@@ -239,7 +233,7 @@ export const useSipStore = defineStore('sip', () => {
             playAudio(callEndSound);
           },
           ended(e) {
-            console.log('[SIP] Call ended:', e.cause);
+            console.warn('[SIP] Call ended:', e.cause);
             pauseAudio(dialingSound);
             playAudio(callEndSound);
           },
@@ -251,7 +245,6 @@ export const useSipStore = defineStore('sip', () => {
         if (s.id !== session.id) s.raw.hold();
       });
 
-      console.log(`[SIP] Outgoing call initiated to ${target}`);
       return session;
     } catch (err) {
       console.error('[SIP] Error initiating call:', err);

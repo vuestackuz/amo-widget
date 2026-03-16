@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useAudio } from '../../composables/useAudio';
 
 const dials = [
   { name: '1', value: '1' }, { name: '2', value: '2' }, { name: '3', value: '3' },
@@ -7,7 +8,15 @@ const dials = [
   { name: '*', value: '*' }, { name: '0', value: '0' }, { name: '#', value: '#' },
 ];
 
+// Maps dial value to DTMF tone group: 1-3 → high, 4-6 → mid, everything else → low
+function dtmfTone(value, audio) {
+  if (['1', '2', '3'].includes(value)) return audio.dtmfHigh;
+  if (['4', '5', '6'].includes(value)) return audio.dtmfMid;
+  return audio.dtmfLow;
+}
+
 export const useCallActionsStore = defineStore('callActions', () => {
+  const { audio, play } = useAudio();
   function acceptCall(rawSession) {
     rawSession.answer({ mediaConstraints: { audio: true, video: false } });
   }
@@ -38,6 +47,7 @@ export const useCallActionsStore = defineStore('callActions', () => {
 
   function sendDialTone(rawSession, value) {
     rawSession.sendDTMF(value);
+    play(dtmfTone(value, audio));
   }
 
   return {
