@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "webpack --mode production",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.{js,vue}",
+    "lint:fix": "eslint src/**/*.{js,vue} --fix"
   },
   "dependencies": {
     "archiver": "^5.3.1",
@@ -28,6 +30,8 @@
     "amdefine": "^1.0.1",
     "babel-loader": "^8.3.0",
     "css-loader": "^6.7.3",
+    "eslint": "^10.0.3",
+    "eslint-plugin-vue": "^10.8.0",
     "imports-loader": "^4.0.1",
     "sass": "^1.97.3",
     "sass-embedded": "^1.93.3",

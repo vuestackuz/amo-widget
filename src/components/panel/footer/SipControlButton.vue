@@ -20,7 +20,12 @@ const toggle = () => {
 </script>
 
 <template>
-  <button :title="title" class="utel-widget-sip-control-button" :class="{active: isActive}" @click="toggle">
+  <button
+    :title="title"
+    class="utel-widget-sip-control-button"
+    :class="{active: isActive}"
+    @click="toggle"
+  >
     <slot>
       <span>{{ label }}</span>
     </slot>

@@ -9,19 +9,37 @@ const { sipUser } = storeToRefs(amocrmStore);
 </script>
 
 <template>
-    <div class="utel-widget-modal__header">
-        <div class="utel-widget-modal__header--left">
-          <h1 class="utel-widget-modal__title">История звонков</h1>
-          <div  class="utel-widget-modal__header--operator">
-            <span>{{ sipUser.attached }}</span>
-          </div>
-        </div>
-        <button type="button" class="utel-widget-modal__close" aria-label="Close" @click="$emit('close')">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-        </button>
+  <div class="utel-widget-modal__header">
+    <div class="utel-widget-modal__header--left">
+      <h1 class="utel-widget-modal__title">
+        История звонков
+      </h1>
+      <div class="utel-widget-modal__header--operator">
+        <span>{{ sipUser.attached }}</span>
+      </div>
     </div>
+    <button
+      type="button"
+      class="utel-widget-modal__close"
+      aria-label="Close"
+      @click="$emit('close')"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </div>
 </template>
 
 <style lang="scss" scoped>
