@@ -9,10 +9,13 @@
       <span>Статус</span>
     </div>
     <div class="calls-table-body">
-      <transition-group tag="div" class="calls" name="calls-table-rows" appear>
+      <div v-if="!calls.length" class="calls-empty">
+        <span>Нет звонков</span>
+      </div>
+      <transition-group v-else tag="div" class="calls" name="calls-table-rows" appear>
         <div
           class="raw"
-          v-for="(call, index) in amoCallsStore.formattedCalls"
+          v-for="(call, index) in calls"
           :key="call.id"
           :class="{
             missed: call.call_status[0] !== 4,
@@ -59,6 +62,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { onMounted, onBeforeUnmount } from "vue";
 import { inHoursMinutesSeconds } from "../../composables/dateTimeFormat";
@@ -72,6 +76,8 @@ import IconCallArrowIn from "../../icons/IconCallArrowIn.vue";
 import IconCallArrowOut from "../../icons/IconCallArrowOut.vue";
 import IconCallArrowInternal from "../../icons/IconCallArrowInternal.vue";
 import IconNumberCall from "../../icons/IconNumberCall.vue";
+
+defineProps(['calls']);
 
 const contactsStore = useContactsStore();
 const helpersStore = useHelpersStore();
@@ -166,6 +172,7 @@ onBeforeUnmount(() => {
         border: none;
         outline: none;
         position: relative;
+        color: var(--utel-widget-text-color);
         svg {
           position: absolute;
           height: 20px;
@@ -211,6 +218,15 @@ onBeforeUnmount(() => {
     min-width: 1200px;
 
     position: relative;
+    .calls-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.4;
+      font-size: var(--utel-widget-font-size);
+    }
     .calls {
       position: relative;
       div.raw {

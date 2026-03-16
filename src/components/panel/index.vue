@@ -37,7 +37,10 @@ const handleClose = () => {
   min-height: 300px;
 
   &__content {
-    padding: 16px 32px;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>

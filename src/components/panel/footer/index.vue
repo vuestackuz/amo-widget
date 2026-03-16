@@ -9,23 +9,23 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
 </script>
 
 <template>
-    <div class="utel-widget-modal__footer">
-        <CallInput />
-        <SipControlButton
-          title="DND"
-          label="Не беспокоить"
-          :model-value="sipStore.dnd"
-          @update:model-value="sipStore.setDND"
-        />
-        <SipControlButton
-          title="Multichannel"
-          label="Многоканальность"
-          :model-value="sipStore.multiChannel"
-          @update:model-value="sipStore.setMultiChannel"
-        />
-        <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
-    </div>
-    <CallControlPanel />
+  <div class="utel-widget-modal__footer">
+    <CallInput />
+    <SipControlButton
+      title="Не беспокоить — отклонять входящие звонки"
+      label="Не беспокоить"
+      :model-value="sipStore.dnd"
+      @update:model-value="sipStore.setDND"
+    />
+    <SipControlButton
+      title="Многоканальность — принимать несколько звонков одновременно"
+      label="Многоканальность"
+      :model-value="sipStore.multiChannel"
+      @update:model-value="sipStore.setMultiChannel"
+    />
+    <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
+  </div>
+  <CallControlPanel />
 </template>
 
 <style lang="scss" scoped>
