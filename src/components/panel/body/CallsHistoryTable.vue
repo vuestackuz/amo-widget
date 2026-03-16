@@ -128,8 +128,8 @@ function CallTo(number) {
   sipStore.makeCall(number);
 }
 
-onMounted(async () => {
-  await amoCallsStore.fetchCalls();
+onMounted(() => {
+  amoCallsStore.fetchCalls();
   amoCallsStore.reAddContactInfo();
 });
 

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import api from '../../api/axios';
 import { useContactsStore } from './contacts';
+import { getCallsFromStorage, saveCallToStorage } from '../../utils/callStorage';
 
 const CALL_STATUSES = {
   1: 'Входящий',
@@ -23,15 +23,17 @@ export const useAmoCallsStore = defineStore('amoCalls', () => {
     }))
   );
 
-  async function fetchCalls() {
-    try {
-      const response = await api.get('/amocrm/widget/calls');
-      calls.value = (response?.result ?? []).map((call) => ({
-        ...call,
-        contact: call.contact ?? null,
-      }));
-    } catch (err) {
-      console.error('[AmoCalls] Failed to fetch calls:', err);
+  function fetchCalls() {
+    calls.value = getCallsFromStorage();
+  }
+
+  function addCall(call) {
+    saveCallToStorage(call);
+    const idx = calls.value.findIndex(c => c.id === call.id);
+    if (idx !== -1) {
+      calls.value[idx] = call;
+    } else {
+      calls.value.unshift(call);
     }
   }
 
@@ -54,6 +56,7 @@ export const useAmoCallsStore = defineStore('amoCalls', () => {
     calls,
     formattedCalls,
     fetchCalls,
+    addCall,
     reAddContactInfo,
   };
 });

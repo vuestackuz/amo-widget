@@ -4,6 +4,7 @@ import { computed, ref, markRaw } from 'vue';
 import { useAmocrmStore } from './amocrm.store';
 import { useAudio } from '../composables/useAudio';
 import { checkMicAccess } from '../composables/useMic';
+import { useAmoCallsStore } from './amo-api/amo-calls';
 
 export const useSipStore = defineStore('sip', () => {
   const amocrmStore = useAmocrmStore();
@@ -142,11 +143,32 @@ export const useSipStore = defineStore('sip', () => {
       }
 
       function cleanupCall(cause = 'Unknown') {
+        const sess = sessions.value[id];
+        if (sess) {
+          const isAccepted = sess.isAccepted;
+          const direction = sess.direction;
+          let status;
+          if (direction === 'outgoing') status = isAccepted ? 4 : 3;
+          else status = isAccepted ? 1 : 2;
+
+          useAmoCallsStore().addCall({
+            id: sess.id,
+            direction,
+            number: sess.number,
+            displayName: sess.displayName,
+            duration: sess.duration,
+            startTime: sess.startTime?.toISOString() ?? null,
+            endTime: new Date().toISOString(),
+            status,
+            contact: sess.contact,
+          });
+
+          clearInterval(sess.timer);
+        }
         pauseAudio(ringtone);
         remoteAudio.srcObject = null;
         remoteAudio.src = '';
         playAudio(callEndSound, false);
-        if (sessions.value[id]?.timer) clearInterval(sessions.value[id].timer);
         delete sessions.value[id];
         console.warn(`[SIP] Call ended — id=${id} cause=${cause}`);
       }
