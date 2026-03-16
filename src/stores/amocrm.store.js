@@ -7,10 +7,10 @@ export const useAmocrmStore = defineStore('amocrm', () => {
 
   const amocrmInfo = ref(null);
   const isError = ref(false);
+  const errorMessage = ref(null);
 
   const websocket = computed(() => amocrmInfo.value?.websocket);
   const sipUser = computed(() => amocrmInfo.value?.sip_user);
-
 
   const fetchAmocrmInfo = async () => {
     try {
@@ -20,13 +20,14 @@ export const useAmocrmStore = defineStore('amocrm', () => {
       isError.value = true;
       errorMessage.value = error.message;
     }
-  }
+  };
 
   return {
     amocrmInfo,
     isError,
+    errorMessage,
     fetchAmocrmInfo,
     websocket,
     sipUser,
-  }
-})
+  };
+});

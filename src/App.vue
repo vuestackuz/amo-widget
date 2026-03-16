@@ -3,19 +3,22 @@ import { ref, onMounted } from 'vue';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
 import { useAmocrmStore } from './stores/amocrm.store';
+import { useSipStore } from './stores/sip.store';
 import { storeToRefs } from 'pinia';
 
 const amocrmStore = useAmocrmStore();
-const { fetchAmocrmInfo, isError } = storeToRefs(amocrmStore);
+const sipStore = useSipStore();
+const { isError } = storeToRefs(amocrmStore);
 const isModalOpen = ref(false);
 
 const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
-}
+};
 
 onMounted(async () => {
   await amocrmStore.fetchAmocrmInfo();
-})
+  sipStore.initSip();
+});
 </script>
 <template>
   <ModalTriggerButton @open="toggleModal" />
