@@ -112,6 +112,7 @@ export const useSipStore = defineStore('sip', () => {
         endTime: null,
         isMuted: false,
         isOnHold: false,
+        isRemoteHold: false,
         contact: null,
         passiveCall: false,
       };
@@ -131,13 +132,16 @@ export const useSipStore = defineStore('sip', () => {
 
       // Attach remote audio track
       const remoteAudio = new Audio();
-      function attachRemoteAudio() {
+      function attachRemoteAudio(attempt = 0) {
         const pc = session.connection;
         if (!pc) return;
         const tracks = pc.getReceivers()
           .map((r) => r.track)
           .filter((t) => t?.kind === 'audio');
-        if (!tracks.length) return;
+        if (!tracks.length) {
+          if (attempt < 5) setTimeout(() => attachRemoteAudio(attempt + 1), 200);
+          return;
+        }
         remoteAudio.srcObject = new MediaStream(tracks);
         remoteAudio.play().catch(() => {});
       }
@@ -196,8 +200,8 @@ export const useSipStore = defineStore('sip', () => {
 
       session.on('hold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = true; });
       session.on('unhold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = false; });
-      session.on('remotehold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = true; });
-      session.on('remoteunhold', () => { if (sessions.value[id]) sessions.value[id].isOnHold = false; });
+      session.on('remotehold', () => { if (sessions.value[id]) sessions.value[id].isRemoteHold = true; });
+      session.on('remoteunhold', () => { if (sessions.value[id]) sessions.value[id].isRemoteHold = false; });
       session.on('muted', () => { if (sessions.value[id]) sessions.value[id].isMuted = true; });
       session.on('unmuted', () => { if (sessions.value[id]) sessions.value[id].isMuted = false; });
 
@@ -205,6 +209,15 @@ export const useSipStore = defineStore('sip', () => {
     });
 
     ua.start();
+  }
+
+  // --- Session contact ---
+  function setSessionContact(id, contact) {
+    if (!sessions.value[id]) return;
+    sessions.value[id].contact = {
+      contact_page_link: contact.contact_page_link,
+      name: contact.name,
+    };
   }
 
   // --- Stop UA ---
@@ -287,5 +300,6 @@ export const useSipStore = defineStore('sip', () => {
     initSip,
     stopSip,
     makeCall,
+    setSessionContact,
   };
 });

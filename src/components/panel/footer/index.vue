@@ -24,12 +24,13 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
       @update:model-value="sipStore.setMultiChannel"
     />
     <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
+    <CallControlPanel />
   </div>
-  <CallControlPanel />
 </template>
 
 <style lang="scss" scoped>
 .utel-widget-modal__footer {
+  position: relative;
   padding: 16px 32px;
   margin-top: auto;
   display: flex;

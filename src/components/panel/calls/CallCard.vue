@@ -7,7 +7,7 @@
   >
     <CallCardPopout :show-dial="showDial" :session="props.session" :show-transfer="showTransfer" :dial-buttons-style="dialButtonsStyle" :transfer-style="transferStyle" />
 
-    <div class="left-side-indicator" :class="{active: props.session.isAccepted && !props.session.isOnHold}"></div>
+    <div class="left-side-indicator" :class="{active: props.session.isAccepted && !props.session.isOnHold && !props.session.isRemoteHold}"></div>
 
     <div class="caller-info">
       <div>
@@ -70,9 +70,9 @@
 import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 import { useCallActionsStore } from '../../../stores/js-sip/callActions';
 import CallCardPopout from './CallCardPopout.vue';
-import { useSipStore } from '../../../stores/js-sip/sipStore';
 import { useContactsStore } from '../../../stores/amo-api/contacts';
 import { useHelpersStore } from '../../../stores/helpers';
+import { useContactLinking } from '../../../composables/useContactLinking';
 import IconAcceptCall from '../../icons/IconAcceptCall.vue';
 import IconRejectCall from '../../icons/IconRejectCall.vue';
 import IconTransferCall from '../../icons/IconTransferCall.vue';
@@ -85,36 +85,9 @@ import IconAddContact from '../../icons/IconAddContact.vue';
 
 const props = defineProps(["session"]);
 const callActions = useCallActionsStore();
-const sipStore = useSipStore();
 const contactsStore = useContactsStore();
 const helpersStore = useHelpersStore();
-
-let retryTimeout = null;
-
-async function newContact(phone, id) {
-  await contactsStore.createContactIfMissing(phone);
-
-  let attemptsLeft = 5;
-  const retry = async () => {
-    if (!sipStore.sessions[id] || attemptsLeft <= 0) return;
-    attemptsLeft--;
-    const contact = await contactsStore.findContactByPhone(phone);
-    if (contact !== null && contact.contact_page_link) {
-      setContactInfo(id, contact);
-      return;
-    }
-    retryTimeout = setTimeout(retry, 1000);
-  };
-
-  retry();
-}
-
-function setContactInfo(id, contact) {
-  sipStore.sessions[id].contact = {
-    contact_page_link: contact.contact_page_link,
-    name: contact.name,
-  };
-}
+const { newContact, clearRetry } = useContactLinking();
 
 // ----------------------
 // Dial & Transfer popup
@@ -237,8 +210,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  clearInterval(props.session.timer);
-  clearTimeout(retryTimeout);
+  clearRetry();
   document.removeEventListener('mousemove', onMouseMove);
   document.removeEventListener('mouseup', onMouseUp);
   window.removeEventListener('resize', clampCard);

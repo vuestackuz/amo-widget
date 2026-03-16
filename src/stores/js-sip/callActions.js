@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { useAudio } from '../../composables/useAudio';
+import { useGlobalsStore } from '../globals';
 
 const dials = [
   { name: '1', value: '1' }, { name: '2', value: '2' }, { name: '3', value: '3' },
@@ -17,37 +18,63 @@ function dtmfTone(value, audio) {
 
 export const useCallActionsStore = defineStore('callActions', () => {
   const { audio, play } = useAudio();
+
   function acceptCall(rawSession) {
-    rawSession.answer({ mediaConstraints: { audio: true, video: false } });
+    try {
+      rawSession.answer({ mediaConstraints: { audio: true, video: false } });
+    } catch (err) {
+      console.error('[SIP] acceptCall failed:', err);
+    }
   }
 
   function endCall(rawSession) {
-    rawSession.terminate();
+    try {
+      rawSession.terminate();
+    } catch (err) {
+      console.error('[SIP] endCall failed:', err);
+    }
   }
 
   function toggleMuteCall(rawSession) {
-    if (rawSession.isMuted().audio) {
-      rawSession.unmute({ audio: true });
-    } else {
-      rawSession.mute({ audio: true });
+    try {
+      if (rawSession.isMuted().audio) {
+        rawSession.unmute({ audio: true });
+      } else {
+        rawSession.mute({ audio: true });
+      }
+    } catch (err) {
+      console.error('[SIP] toggleMuteCall failed:', err);
     }
   }
 
   function toggleHold(rawSession) {
-    if (rawSession.isOnHold().local) {
-      rawSession.unhold();
-    } else {
-      rawSession.hold();
+    try {
+      if (rawSession.isOnHold().local) {
+        rawSession.unhold();
+      } else {
+        rawSession.hold();
+      }
+    } catch (err) {
+      console.error('[SIP] toggleHold failed:', err);
     }
   }
 
-  function transferCall(rawSession, number, domain) {
-    rawSession.refer(`sip:${number}@${domain}`);
+  function transferCall(rawSession, number) {
+    try {
+      const domain = useGlobalsStore().mainDomain;
+      rawSession.refer(`sip:${number}@${domain}`);
+    } catch (err) {
+      console.error('[SIP] transferCall failed:', err);
+    }
   }
 
   function sendDialTone(rawSession, value) {
-    rawSession.sendDTMF(value);
-    play(dtmfTone(value, audio));
+    try {
+      rawSession.sendDTMF(value);
+      play(dtmfTone(value, audio));
+    } catch (err) {
+      console.error('[SIP] sendDialTone failed:', err);
+    }
   }
 
   return {

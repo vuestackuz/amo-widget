@@ -41,7 +41,7 @@ function onPhoneInput(e) {
 }
 
 function transferCall() {
-  callActions.transferCall(props.session.raw, targetNumber.value, globals.mainDomain);
+  callActions.transferCall(props.session.raw, targetNumber.value);
 }
 </script>
 
