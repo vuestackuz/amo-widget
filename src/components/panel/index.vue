@@ -1,6 +1,7 @@
 <script setup>
 import Footer from './footer/index.vue';
 import Header from './Header.vue';
+import Body from './body/index.vue';
 const emit = defineEmits(['close'])
 
 const handleClose = () => {
@@ -12,7 +13,7 @@ const handleClose = () => {
     <div class="utel-widget-modal">
         <Header @close="handleClose" />
         <div class="utel-widget-modal__content">
-            <h2>Utel Widget Panel</h2>
+            <Body />
         </div>
         <Footer />
     </div>
