@@ -1,6 +1,7 @@
 <script setup>
 import CallInput from './CallInput.vue';
 import SipControlButton from './SipControlButton.vue';
+import CallControlPanel from '../calls/CallControlPanel.vue';
 
 const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__.version;
 </script>
@@ -12,6 +13,7 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__.version;
         <SipControlButton title="Multichannel" label="Многоканальность" />
         <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
     </div>
+    <CallControlPanel />
 </template>
 
 <style lang="scss" scoped>

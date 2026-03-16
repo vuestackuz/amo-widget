@@ -120,6 +120,8 @@ export const useSipStore = defineStore('sip', () => {
         endTime: null,
         isMuted: false,
         isOnHold: false,
+        contact: null,
+        passiveCall: false,
       };
 
       // Call duration timer
