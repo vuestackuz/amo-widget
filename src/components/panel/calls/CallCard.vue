@@ -68,10 +68,10 @@
 
 <script setup>
 import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
-import { useCallActionsStore } from '../../../stores/js-sip/callActions';
+import { useCallActionsStore } from '../../../stores/call-actions.store';
 import CallCardPopout from './CallCardPopout.vue';
-import { useContactsStore } from '../../../stores/amo-api/contacts';
-import { useHelpersStore } from '../../../stores/helpers';
+import { useContactsStore } from '../../../stores/contacts.store';
+import { useHelpersStore } from '../../../stores/helpers.store';
 import { useContactLinking } from '../../../composables/useContactLinking';
 import IconAcceptCall from '../../icons/IconAcceptCall.vue';
 import IconRejectCall from '../../icons/IconRejectCall.vue';
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .call-card {
-  position: absolute;
+  position: fixed;
   width: 260px;
   aspect-ratio: 3.2 / 1;
   background-color: black;

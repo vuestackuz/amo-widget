@@ -4,7 +4,7 @@ import { computed, ref, markRaw } from 'vue';
 import { useAmocrmStore } from './amocrm.store';
 import { useAudio } from '../composables/useAudio';
 import { checkMicAccess } from '../composables/useMic';
-import { useAmoCallsStore } from './amo-api/amo-calls';
+import { useAmoCallsStore } from './amo-calls.store';
 
 export const useSipStore = defineStore('sip', () => {
   const amocrmStore = useAmocrmStore();

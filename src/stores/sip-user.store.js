@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import { useAmocrmStore } from '../amocrm.store';
+import { useAmocrmStore } from './amocrm.store';
 
 export const useUtelSipUserStore = defineStore('utelSipUser', () => {
   const amocrmStore = useAmocrmStore();

@@ -11,7 +11,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useAmoCallsStore } from '../../../stores/amo-api/amo-calls';
+import { useAmoCallsStore } from '../../../stores/amo-calls.store';
 import CallsHistoryTable from './CallsHistoryTable.vue';
 
 const amoCallsStore = useAmoCallsStore();

@@ -1,5 +1,5 @@
-import { useContactsStore } from '../stores/amo-api/contacts';
-import { useSipStore } from '../stores/js-sip/sipStore';
+import { useContactsStore } from '../stores/contacts.store';
+import { useSipStore } from '../stores/sip.store';
 
 export function useContactLinking() {
   const contactsStore = useContactsStore();

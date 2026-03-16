@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { useAudio } from '../../composables/useAudio';
-import { useGlobalsStore } from '../globals';
+import { useAudio } from '../composables/useAudio';
+import { useGlobalsStore } from './globals.store';
 
 const dials = [
   { name: '1', value: '1' }, { name: '2', value: '2' }, { name: '3', value: '3' },

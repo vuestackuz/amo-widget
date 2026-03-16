@@ -14,8 +14,8 @@
   
   <script setup>
   import { computed } from 'vue';
-  import { useSipStore } from '../../../stores/js-sip/sipStore';
-  import { useSipWSStore } from '../../../stores/utel-api/utel-sip-ws';
+  import { useSipStore } from '../../../stores/sip.store';
+  import { useSipWSStore } from '../../../stores/sip-ws.store';
   import CallCard from './CallCard.vue'
 
   const sipStore = useSipStore()
@@ -33,7 +33,16 @@
   
   <style lang="scss" scoped>
   #utel-calls-component {
-  
+    position: absolute;
+    bottom: calc(100% + 12px);
+    height: auto;
+    min-height: 30px;
+    max-height: calc(100vh - 240px);
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    width: 100%;
+    padding: 0 20px;
   }
   
   .new-call-enter-active,

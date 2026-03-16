@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { useContactsStore } from './contacts';
-import { getCallsFromStorage, saveCallToStorage } from '../../utils/callStorage';
+import { useContactsStore } from './contacts.store';
+import { getCallsFromStorage, saveCallToStorage } from '../utils/callStorage';
 
 const CALL_STATUSES = {
   1: 'Входящий',

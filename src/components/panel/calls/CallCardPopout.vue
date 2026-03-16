@@ -23,8 +23,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useGlobalsStore } from '../../../stores/globals';
-import { useCallActionsStore } from '../../../stores/js-sip/callActions';
+import { useGlobalsStore } from '../../../stores/globals.store';
+import { useCallActionsStore } from '../../../stores/call-actions.store';
 import IconTransferToNumber from '../../icons/IconTransferToNumber.vue';
 
 const props = defineProps(["session", "showDial", "showTransfer", "dialButtonsStyle", "transferStyle"])

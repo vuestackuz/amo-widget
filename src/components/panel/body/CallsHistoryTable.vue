@@ -66,11 +66,11 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from "vue";
 import { inHoursMinutesSeconds } from "../../composables/dateTimeFormat";
-import { useContactsStore } from "../../../stores/amo-api/contacts";
-import { useHelpersStore } from "../../../stores/helpers";
-import { useSipStore } from "../../../stores/js-sip/sipStore";
-import { useUtelSipUserStore } from "../../../stores/utel-api/sipUser";
-import { useAmoCallsStore } from "../../../stores/amo-api/amo-calls";
+import { useContactsStore } from "../../../stores/contacts.store";
+import { useHelpersStore } from "../../../stores/helpers.store";
+import { useSipStore } from "../../../stores/sip.store";
+import { useUtelSipUserStore } from "../../../stores/sip-user.store";
+import { useAmoCallsStore } from "../../../stores/amo-calls.store";
 import logger from "../../composables/logger";
 import IconCallArrowIn from "../../icons/IconCallArrowIn.vue";
 import IconCallArrowOut from "../../icons/IconCallArrowOut.vue";
