@@ -10,21 +10,27 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
 
 <template>
   <div class="utel-widget-modal__footer">
-    <CallInput />
-    <SipControlButton
-      title="Не беспокоить — отклонять входящие звонки"
-      label="Не беспокоить"
-      :model-value="sipStore.dnd"
-      @update:model-value="sipStore.setDND"
-    />
-    <SipControlButton
-      title="Многоканальность — принимать несколько звонков одновременно"
-      label="Многоканальность"
-      :model-value="sipStore.multiChannel"
-      @update:model-value="sipStore.setMultiChannel"
-    />
+    <span
+      v-if="!sipStore.hasCredential"
+      class="utel-widget-modal__footer--no-credential"
+    >Учётные данные SIP не настроены</span>
+    <template v-else>
+      <CallInput />
+      <SipControlButton
+        title="Не беспокоить — отклонять входящие звонки"
+        label="Не беспокоить"
+        :model-value="sipStore.dnd"
+        @update:model-value="sipStore.setDND"
+      />
+      <SipControlButton
+        title="Многоканальность — принимать несколько звонков одновременно"
+        label="Многоканальность"
+        :model-value="sipStore.multiChannel"
+        @update:model-value="sipStore.setMultiChannel"
+      />
+    </template>
     <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
-    <CallControlPanel />
+    <CallControlPanel v-if="sipStore.hasCredential" />
   </div>
 </template>
 
@@ -43,6 +49,12 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
     margin-left: auto;
     color: var(--utel-widget-text-color);
     font-weight: 400;
+  }
+
+  &--no-credential {
+    color: var(--utel-widget-text-secondary);
+    font-size: calc(0.9 * var(--utel-widget-font-size));
+    opacity: 0.6;
   }
 }
 </style>

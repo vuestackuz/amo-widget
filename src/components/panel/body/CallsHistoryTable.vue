@@ -59,7 +59,7 @@
           </span>
           <span>
             <button
-              v-if="SipUserStore.sipUser"
+              v-if="sipStore.hasCredential"
               @click="CallTo(call.number)"
             >
               <IconNumberCall v-if="call.number.length" />
