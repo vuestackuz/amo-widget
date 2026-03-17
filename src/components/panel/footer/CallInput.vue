@@ -5,10 +5,11 @@ import { useSipStore } from '../../../stores/sip.store';
 const sipStore = useSipStore();
 const phoneNumber = ref('');
 
-function handleCall() {
+async function handleCall() {
   const number = phoneNumber.value.trim();
   if (!number) return;
-  sipStore.makeCall(number);
+  const session = await sipStore.makeCall(number);
+  if (session) phoneNumber.value = '';
 }
 </script>
 
