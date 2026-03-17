@@ -1,13 +1,23 @@
 <template>
-  <div class="call-card"
+  <div
     :id="props.session.id"
     ref="callCardRef"
-    @mousedown="onMouseDown"
+    class="call-card"
     :style="computedStyle"
+    @mousedown="onMouseDown"
   >
-    <CallCardPopout :show-dial="showDial" :session="props.session" :show-transfer="showTransfer" :dial-buttons-style="dialButtonsStyle" :transfer-style="transferStyle" />
+    <CallCardPopout
+      :show-dial="showDial"
+      :session="props.session"
+      :show-transfer="showTransfer"
+      :dial-buttons-style="dialButtonsStyle"
+      :transfer-style="transferStyle"
+    />
 
-    <div class="left-side-indicator" :class="{active: props.session.isAccepted && !props.session.isOnHold && !props.session.isRemoteHold}"></div>
+    <div
+      class="left-side-indicator"
+      :class="{active: props.session.isAccepted && !props.session.isOnHold && !props.session.isRemoteHold}"
+    />
 
     <div class="caller-info">
       <div>
@@ -15,8 +25,7 @@
           <button
             v-if="props.session.contact !== null && props.session.contact !== 'waiting_for_the_value'"
             @click="contactsStore.openWidgetPage(props.session.contact.contact_page_link)"
-            >{{ props.session.contact?.name ? helpersStore.abbreviatedContactName(props.session.contact.name) : "" }}</button
-          >
+          >{{ props.session.contact?.name ? helpersStore.abbreviatedContactName(props.session.contact.name) : "" }}</button>
           <span v-else>{{ props.session.displayName }}</span>
         </strong>
         <span>{{ props.session.number }}</span>
@@ -30,23 +39,44 @@
         </div>
       </div>
       <div class="right">
-        <button class="add-contact-button" :style="{bottom: props.session.passiveCall?'26px':'38px'}" v-if="props.session.contact === null" @click="newContact(props.session.number, props.session.id)">
+        <button
+          v-if="props.session.contact === null"
+          class="add-contact-button"
+          :style="{bottom: props.session.passiveCall?'26px':'38px'}"
+          @click="newContact(props.session.number, props.session.id)"
+        >
           <IconAddContact />
         </button>
-        <div class="call-actions" v-if="!props.session.passiveCall">
+        <div
+          v-if="!props.session.passiveCall"
+          class="call-actions"
+        >
           <div class="conditional">
-            <button class="accept-call-button" v-if="!props.session.isAccepted && props.session.direction === 'incoming'" @click="callActions.acceptCall(props.session.raw)">
+            <button
+              v-if="!props.session.isAccepted && props.session.direction === 'incoming'"
+              class="accept-call-button"
+              @click="callActions.acceptCall(props.session.raw)"
+            >
               <IconAcceptCall />
             </button>
-            <div class="active-call-actions" v-if="props.session.isAccepted">
-              <button @click="showOrToggle('transfer')" :class="{active: showTransfer}">
+            <div
+              v-if="props.session.isAccepted"
+              class="active-call-actions"
+            >
+              <button
+                :class="{active: showTransfer}"
+                @click="showOrToggle('transfer')"
+              >
                 <IconTransferCall />
               </button>
               <button @click="callActions.toggleMuteCall(props.session.raw)">
                 <IconMicOn v-if="!props.session.isMuted" />
                 <IconMicOff v-else />
               </button>
-              <button @click="showOrToggle('dial')" :class="{active: showDial}">
+              <button
+                :class="{active: showDial}"
+                @click="showOrToggle('dial')"
+              >
                 <IconDial />
               </button>
               <button @click="callActions.toggleHold(props.session.raw)">
@@ -55,14 +85,22 @@
               </button>
             </div>
           </div>
-          <button class="reject-call-button" v-if="!props.session.passiveCall" @click="callActions.endCall(props.session.raw)">
+          <button
+            v-if="!props.session.passiveCall"
+            class="reject-call-button"
+            @click="callActions.endCall(props.session.raw)"
+          >
             <IconRejectCall />
           </button>
         </div>
       </div>
     </div>
 
-    <audio :id="`caller-voice-${props.session.id}`" autoplay playsinline></audio>
+    <audio
+      :id="`caller-voice-${props.session.id}`"
+      autoplay
+      playsinline
+    />
   </div>
 </template>
 
@@ -113,8 +151,9 @@ function showOrToggle(popup) {
 // Timer formatting
 // ----------------------
 const formattedDuration = computed(() => {
-  const m = Math.floor(props.session.duration / 60).toString().padStart(2, '0');
-  const s = (props.session.duration % 60).toString().padStart(2, '0');
+  const seconds = props.session.talkDuration || props.session.duration;
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 });
 

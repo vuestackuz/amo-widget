@@ -6,6 +6,7 @@
       <span>Контакт</span>
       <span>Номер</span>
       <span>Длительность</span>
+      <span>Время разговора</span>
       <span>Статус</span>
     </div>
     <div class="calls-table-body">
@@ -55,6 +56,7 @@
             </div>
           </span>
           <span>{{ inHoursMinutesSeconds(call.duration) }}</span>
+          <span>{{ call.talkDuration ? inHoursMinutesSeconds(call.talkDuration) : '—' }}</span>
           <span>{{ call.call_status[1] }}</span>
         </div>
       </transition-group>
@@ -153,7 +155,7 @@ onBeforeUnmount(() => {
   .calls-table-header,
   .calls-table-body .calls div.raw {
     display: grid;
-    grid-template-columns: 80px repeat(5, 1fr);
+    grid-template-columns: 80px repeat(6, 1fr);
     align-items: center;
     padding: 0 20px;
     height: 40px;

@@ -102,6 +102,9 @@ export const useSipStore = defineStore('sip', () => {
         timer: null,
         isAccepted: false,
         duration: 0,
+        talkTimer: null,
+        talkDuration: 0,
+        talkStartTime: null,
         displayName:
           session.remote_identity?._display_name ||
           session.remote_identity?.uri?.user ||
@@ -146,6 +149,19 @@ export const useSipStore = defineStore('sip', () => {
         remoteAudio.play().catch(() => {});
       }
 
+      function startTalkTimer() {
+        const sess = sessions.value[id];
+        if (!sess || sess.talkTimer) return;
+        sess.talkStartTime = new Date();
+        sess.talkTimer = setInterval(() => {
+          if (sessions.value[id]) {
+            sessions.value[id].talkDuration = Math.floor(
+              (Date.now() - sessions.value[id].talkStartTime.getTime()) / 1000
+            );
+          }
+        }, 1000);
+      }
+
       function cleanupCall(cause = 'Unknown') {
         const sess = sessions.value[id];
         if (sess) {
@@ -161,6 +177,7 @@ export const useSipStore = defineStore('sip', () => {
             number: sess.number,
             displayName: sess.displayName,
             duration: sess.duration,
+            talkDuration: sess.talkDuration,
             startTime: sess.startTime?.toISOString() ?? null,
             endTime: new Date().toISOString(),
             status,
@@ -168,6 +185,7 @@ export const useSipStore = defineStore('sip', () => {
           });
 
           clearInterval(sess.timer);
+          clearInterval(sess.talkTimer);
         }
         pauseAudio(ringtone);
         remoteAudio.srcObject = null;
@@ -181,11 +199,13 @@ export const useSipStore = defineStore('sip', () => {
         attachRemoteAudio();
         sessions.value[id].isAccepted = true;
         pauseAudio(ringtone);
+        startTalkTimer();
       });
 
       session.on('confirmed', () => {
         attachRemoteAudio();
         sessions.value[id].isAccepted = true;
+        startTalkTimer();
       });
 
       session.on('ended', (data) => {
