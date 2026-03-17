@@ -307,6 +307,12 @@ export const useSipStore = defineStore('sip', () => {
     }
   }
 
+  function holdAllCalls() {
+    Object.values(sessions.value).forEach((s) => {
+      if (s.isAccepted && !s.isOnHold) s.raw.hold();
+    });
+  }
+
   return {
     sessions,
     liveCalls,
@@ -320,6 +326,7 @@ export const useSipStore = defineStore('sip', () => {
     initSip,
     stopSip,
     makeCall,
+    holdAllCalls,
     setSessionContact,
   };
 });

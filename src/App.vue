@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
 import { useAmocrmStore } from './stores/amocrm.store';
@@ -15,14 +15,28 @@ const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
 };
 
+function onBeforeUnload(e) {
+  if (!sipStore.liveCalls) return;
+  sipStore.holdAllCalls();
+  e.preventDefault();
+}
+
 onMounted(async () => {
   await amocrmStore.fetchAmocrmInfo();
   sipStore.initSip();
+  window.addEventListener('beforeunload', onBeforeUnload);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', onBeforeUnload);
 });
 </script>
 <template>
   <ModalTriggerButton @open="toggleModal" />
-  <Panel v-if="isModalOpen" @close="toggleModal" />
+  <Panel
+    v-if="isModalOpen"
+    @close="toggleModal"
+  />
 </template>
 
 

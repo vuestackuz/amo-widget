@@ -10,14 +10,23 @@
       <span>Статус</span>
     </div>
     <div class="calls-table-body">
-      <div v-if="!calls.length" class="calls-empty">
+      <div
+        v-if="!calls.length"
+        class="calls-empty"
+      >
         <span>Нет звонков</span>
       </div>
-      <transition-group v-else tag="div" class="calls" name="calls-table-rows" appear>
+      <transition-group
+        v-else
+        tag="div"
+        class="calls"
+        name="calls-table-rows"
+        appear
+      >
         <div
-          class="raw"
           v-for="(call, index) in calls"
           :key="call.id"
+          class="raw"
           :class="{
             missed: call.call_status[0] !== 4,
             incoming: call.direction === 'incoming',
@@ -27,7 +36,7 @@
           :style="{'--from-top': `calc(40px * ${index})`}"
         >
           <span>
-            <div class="status-bar"></div>
+            <div class="status-bar" />
             <IconCallArrowIn v-if="call.direction === 'incoming'" />
             <IconCallArrowOut v-else-if="call.direction === 'outgoing'" />
             <IconCallArrowInternal v-else-if="call.number <= 5" />
@@ -40,18 +49,26 @@
             <button
               v-if="call.contact !== null && call.contact?.contact_page_link"
               @click="contactsStore.openWidgetPage(call.contact.contact_page_link)"
-              >{{ call.contact?.name ? helpersStore.abbreviatedContactName(call.contact.name) : "" }}</button
+            >{{ call.contact?.name ? helpersStore.abbreviatedContactName(call.contact.name) : "" }}</button>
+            <button
+              v-else
+              @click="newContact(call.number, call.id)"
             >
-            <button v-else @click="newContact(call.number, call.id)">
               Создать контакт
             </button>
           </span>
           <span>
-            <button v-if="SipUserStore.sipUser" @click="CallTo(call.number)">
+            <button
+              v-if="SipUserStore.sipUser"
+              @click="CallTo(call.number)"
+            >
               <IconNumberCall v-if="call.number.length" />
               <span>{{ call.number }}</span>
             </button>
-            <div class="without-the-call-action" v-else>
+            <div
+              v-else
+              class="without-the-call-action"
+            >
               <span>{{ call.number }}</span>
             </div>
           </span>
