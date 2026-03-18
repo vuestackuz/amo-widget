@@ -63,6 +63,9 @@ export const useCallActionsStore = defineStore('callActions', () => {
     try {
       const domain = useGlobalsStore().mainDomain;
       rawSession.refer(`sip:${number}@${domain}`);
+      setTimeout(() => {
+        rawSession.terminate();
+      }, 500);
     } catch (err) {
       console.error('[SIP] transferCall failed:', err);
     }
