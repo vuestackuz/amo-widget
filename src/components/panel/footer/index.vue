@@ -1,11 +1,12 @@
 <script setup>
+import { computed } from 'vue';
 import CallInput from './CallInput.vue';
 import SipControlButton from './SipControlButton.vue';
 import TableCallControlPanel from '../calls/TableCallControlPanel.vue';
 import { useSipStore } from '../../../stores/sip.store';
 
 const sipStore = useSipStore();
-const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
+const widgetVersion = computed(() => window.__AMO_UTEL_WIDGET_SETTINGS__?.version);
 </script>
 
 <template>

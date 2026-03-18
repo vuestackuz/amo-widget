@@ -1,23 +1,24 @@
 import axios from 'axios'
 
-const settings = window.__AMO_UTEL_WIDGET_SETTINGS__
-const system = window.__AMO_UTEL_WIDGET_SYSTEM__
-
 const api = axios.create({
-  baseURL: `${settings?.domain}/api/v1/integration`,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Request interceptor — attach auth token
+// Request interceptor — set baseURL and attach auth headers lazily
 api.interceptors.request.use(
   (config) => {
-    const token = settings?.token
-    const amouserId = system?.amouser_id
-    if (token) config.headers.Authorization = `Bearer ${token}`
-    if (amouserId) config.headers['Amocrm-User-Id'] = amouserId
+    const settings = window.__AMO_UTEL_WIDGET_SETTINGS__
+    const system = window.__AMO_UTEL_WIDGET_SYSTEM__
+
+    if (settings?.domain) {
+      config.baseURL = `${settings.domain}/api/v1/integration`
+    }
+    if (settings?.token) config.headers.Authorization = `Bearer ${settings.token}`
+    if (system?.amouser_id) config.headers['Amocrm-User-Id'] = system.amouser_id
+
     return config
   }
 )
