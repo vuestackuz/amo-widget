@@ -75,6 +75,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .call-card {
+  position: relative;
   width: 100%;
   background-color: black;
   --border-radius: 4px;
