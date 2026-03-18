@@ -2,12 +2,15 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
+import CallControlPanel from './components/panel/calls/CallControlPanel.vue';
 import { useAmocrmStore } from './stores/amocrm.store';
 import { useSipStore } from './stores/sip.store';
+import { useSipWSStore } from './stores/sip-ws.store';
 import { storeToRefs } from 'pinia';
 
 const amocrmStore = useAmocrmStore();
 const sipStore = useSipStore();
+const sipWSStore = useSipWSStore();
 const { isError } = storeToRefs(amocrmStore);
 const isModalOpen = ref(false);
 
@@ -23,7 +26,14 @@ function onBeforeUnload(e) {
 
 onMounted(async () => {
   await amocrmStore.fetchAmocrmInfo();
-  sipStore.initSip();
+  if (!sipStore.hasAttached) {
+    return
+  }
+  if (sipStore.hasCredential) {
+    sipStore.initSip();
+  } else {
+    sipWSStore.init();
+  } 
   window.addEventListener('beforeunload', onBeforeUnload);
 });
 
@@ -37,6 +47,7 @@ onBeforeUnmount(() => {
     v-if="isModalOpen"
     @close="toggleModal"
   />
+  <CallControlPanel v-if="sipStore.hasAttached" />
 </template>
 
 

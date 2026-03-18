@@ -1,8 +1,202 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { markRaw, ref, watch } from 'vue';
+import axios from 'axios';
+import Pusher from 'pusher-js';
+import Echo from 'laravel-echo';
+import { useAmocrmStore } from './amocrm.store';
+import { useUtelSipUserStore } from './sip-user.store';
+import { useSipStore } from './sip.store';
+import { useAmoCallsStore } from './amo-calls.store';
+import { useContactsStore } from './contacts.store';
 
 export const useSipWSStore = defineStore('sipWS', () => {
   const passiveCalls = ref({});
+  const echo = ref(null);
 
-  return { passiveCalls };
+  window.Pusher = Pusher;
+
+  // --- Echo connection ---
+
+  function init() {
+    const sipUserStore = useUtelSipUserStore();
+
+    if (sipUserStore.sipUser?.attached && !sipUserStore.sipUser?.credentials) {
+      const amocrmStore = useAmocrmStore();
+      const websocket = amocrmStore.websocket;
+
+      const settings = window.__AMO_UTEL_WIDGET_SETTINGS__;
+      const system = window.__AMO_UTEL_WIDGET_SYSTEM__;
+      const hostname = settings?.domain?.replace(/^https?:\/\//, '');
+
+      if (!hostname || !settings?.token || !system?.amouser_id || !websocket) {
+        console.warn('[SipWS] Missing required config — skipping Echo connection');
+        return;
+      }
+
+      console.log('[SipWS] Connecting to ws for Sip statuses...');
+
+      echo.value = new Echo({
+        broadcaster: 'reverb',
+        key: websocket.key,
+        wsHost: hostname,
+        wsPort: websocket.ws_port,
+        wssPort: websocket.wss_port,
+        forceTLS: false,
+        enabledTransports: ['ws', 'wss'],
+        authorizer: (channel) => ({
+          authorize: (socketId, callback) => {
+            axios
+              .post(
+                `https://${hostname}/api/broadcasting/auth`,
+                { socket_id: socketId, channel_name: channel.name },
+                {
+                  headers: {
+                    Authorization: `Bearer ${settings.token}`,
+                    'Amocrm-User-Id': system.amouser_id,
+                  },
+                }
+              )
+              .then((response) => callback(false, response.data))
+              .catch((error) => {
+                callback(true, error);
+                console.error('[SipWS] socket_connection_error', error);
+              });
+          },
+        }),
+      });
+    }
+  }
+
+  // --- Passive call helpers ---
+
+  function startPassiveTimer(id) {
+    if (passiveCalls.value[id]?.timer) return;
+
+    passiveCalls.value[id].timer = setInterval(() => {
+      const sess = passiveCalls.value[id];
+      if (!sess?.startTime) return;
+      sess.duration = Math.floor((Date.now() - new Date(sess.startTime).getTime()) / 1000);
+    }, 1000);
+  }
+
+  function sipCheck(e) {
+    const amocrmStore = useAmocrmStore();
+    const attached = amocrmStore.sipUser?.attached;
+    const caller = e?.call?.cdr?.src;
+    const callee = e?.call?.cdr?.dst;
+
+    if (caller == attached) return [callee, 'outgoing'];
+    if (callee == attached) return [caller, 'incoming'];
+    return null;
+  }
+
+  async function handleEvent(e, status) {
+    const id = e?.call?.id;
+    const check = sipCheck(e);
+    if (!id || !check) return;
+
+    const [number, direction] = check;
+    const contactsStore = useContactsStore();
+    const contact = await contactsStore.findContactByPhone(number);
+    const contactInfo = contact
+      ? { contact_page_link: contact.contact_page_link, name: contact.name }
+      : null;
+
+    if (status) {
+      if (!passiveCalls.value[id]) {
+        const sipStore = useSipStore();
+        sipStore.order++;
+        passiveCalls.value[id] = {
+          id,
+          passiveCall: true,
+          number,
+          direction,
+          status,
+          order: sipStore.order,
+          duration: 0,
+          timer: null,
+          startTime: new Date(),
+          endTime: null,
+          isAccepted: status === 'answered',
+          raw: markRaw(e),
+          displayName: number,
+          contact: contactInfo,
+        };
+        startPassiveTimer(id);
+      } else {
+        passiveCalls.value[id].status = status;
+        passiveCalls.value[id].isAccepted = status === 'answered';
+        passiveCalls.value[id].contact = contactInfo;
+      }
+    } else {
+      // Call ended
+      if (!passiveCalls.value[id]) return;
+
+      const sess = passiveCalls.value[id];
+      sess.endTime = new Date();
+
+      if (sess.timer) {
+        clearInterval(sess.timer);
+        sess.timer = null;
+      }
+
+      sess.duration = Math.max(
+        0,
+        Math.floor((sess.endTime.getTime() - new Date(sess.startTime).getTime()) / 1000)
+      );
+
+      const isAccepted = sess.isAccepted;
+      let callStatus;
+      if (direction === 'outgoing') callStatus = isAccepted ? 4 : 3;
+      else callStatus = isAccepted ? 1 : 2;
+
+      useAmoCallsStore().addCall({
+        id,
+        direction: sess.direction,
+        number: sess.number,
+        displayName: sess.displayName,
+        duration: sess.duration,
+        startTime: new Date(sess.startTime).toISOString(),
+        endTime: sess.endTime.toISOString(),
+        status: callStatus,
+        contact: contactInfo,
+      });
+
+      delete passiveCalls.value[id];
+    }
+  }
+
+  // --- Channel subscription — fires once echo is connected ---
+
+  watch(echo, () => {
+    if (!echo.value) return;
+
+    const amocrmStore = useAmocrmStore();
+    const channel = amocrmStore.websocket?.channel;
+    if (!channel) {
+      console.warn('[SipWS] No channel name in websocket config');
+      return;
+    }
+
+    echo.value
+      .channel(channel)
+      .on('App\\Events\\Webhook\\CallStarted',  (e) => handleEvent(e, 'new_call'))
+      .on('App\\Events\\Webhook\\DialStarted',   (e) => handleEvent(e, 'calling'))
+      .on('App\\Events\\Webhook\\DialAnswered',  (e) => handleEvent(e, 'answered'))
+      .on('App\\Events\\Webhook\\DialEnded',     (e) => handleEvent(e, null))
+      .on('App\\Events\\Webhook\\CallSaved',     (e) => handleEvent(e, null))
+      .on('App\\Events\\Webhook\\CallEnded',     (e) => handleEvent(e, null));
+  }, { immediate: true });
+
+  // --- Disconnect ---
+
+  function disconnect() {
+    if (echo.value) {
+      echo.value.disconnect();
+      echo.value = null;
+    }
+    passiveCalls.value = {};
+  }
+
+  return { echo, passiveCalls, init, disconnect };
 });

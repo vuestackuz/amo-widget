@@ -1,7 +1,7 @@
 <script setup>
 import CallInput from './CallInput.vue';
 import SipControlButton from './SipControlButton.vue';
-import CallControlPanel from '../calls/CallControlPanel.vue';
+import TableCallControlPanel from '../calls/TableCallControlPanel.vue';
 import { useSipStore } from '../../../stores/sip.store';
 
 const sipStore = useSipStore();
@@ -9,6 +9,7 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
 </script>
 
 <template>
+  <TableCallControlPanel />
   <div class="utel-widget-modal__footer">
     <span
       v-if="!sipStore.hasCredential"
@@ -30,7 +31,6 @@ const widgetVersion = window.__AMO_UTEL_WIDGET_SETTINGS__?.version;
       />
     </template>
     <span class="utel-widget-modal__footer--version">v{{ widgetVersion }}</span>
-    <CallControlPanel v-if="sipStore.hasCredential" />
   </div>
 </template>
 

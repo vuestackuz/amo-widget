@@ -5,7 +5,7 @@
           v-for="(sess, id) in allCalls"
           :key="id"
           :session="sess"
-          :style="{zIndex: 10000}"
+          :style="{zIndex: 1000}"
         />
       </transition-group>
     </div>
@@ -33,7 +33,7 @@
   
   <style lang="scss" scoped>
   #utel-calls-component {
-    position: absolute;
+    position: fixed;
     bottom: calc(100% + 12px);
     height: auto;
     min-height: 30px;

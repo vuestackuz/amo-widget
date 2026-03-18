@@ -19,6 +19,7 @@ export const useSipStore = defineStore('sip', () => {
 
   const liveCalls = computed(() => Object.keys(sessions.value).length);
   const hasCredential = computed(() => !!amocrmStore.sipUser?.credential);
+  const hasAttached = computed(() => !!amocrmStore.sipUser?.attached);
 
   const { audio, play: playAudio, pause: pauseAudio } = useAudio();
 
@@ -328,5 +329,6 @@ export const useSipStore = defineStore('sip', () => {
     makeCall,
     holdAllCalls,
     setSessionContact,
+    hasAttached,
   };
 });
