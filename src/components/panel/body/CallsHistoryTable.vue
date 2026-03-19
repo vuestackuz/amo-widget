@@ -48,7 +48,7 @@
           <span>
             <button
               v-if="call.contact !== null && call.contact?.contact_page_link"
-              @click="contactsStore.openWidgetPage(call.contact.contact_page_link)"
+              @click="() => { contactsStore.openWidgetPage(call.contact.contact_page_link); globalsStore.isModalOpen = false; }"
             >{{ call.contact?.name ? helpersStore.abbreviatedContactName(call.contact.name) : "" }}</button>
             <button
               v-else
@@ -83,14 +83,13 @@
 
 
 <script setup>
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted } from "vue";
 import { inHoursMinutesSeconds } from "../../composables/dateTimeFormat";
 import { useContactsStore } from "../../../stores/contacts.store";
 import { useHelpersStore } from "../../../stores/helpers.store";
 import { useSipStore } from "../../../stores/sip.store";
-import { useUtelSipUserStore } from "../../../stores/sip-user.store";
 import { useAmoCallsStore } from "../../../stores/amo-calls.store";
-import logger from "../../composables/logger";
+import { useGlobalsStore } from "../../../stores/globals.store";
 import IconCallArrowIn from "../../icons/IconCallArrowIn.vue";
 import IconCallArrowOut from "../../icons/IconCallArrowOut.vue";
 import IconCallArrowInternal from "../../icons/IconCallArrowInternal.vue";
@@ -101,8 +100,8 @@ defineProps(['calls']);
 const contactsStore = useContactsStore();
 const helpersStore = useHelpersStore();
 const sipStore = useSipStore();
-const SipUserStore = useUtelSipUserStore();
 const amoCallsStore = useAmoCallsStore();
+const globalsStore = useGlobalsStore();
 
 function formatIsoToReadable(isoString) {
   const date = new Date(isoString);
@@ -114,52 +113,25 @@ function formatIsoToReadable(isoString) {
   return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
 }
 
-let retryTimeout = null;
-
 async function newContact(phone, id) {
-  await contactsStore.createContactIfMissing(phone);
-
-  let attemptsLeft = 5;
-  const retry = async () => {
+  const { created, contact } = await contactsStore.createContactIfMissing(phone);
+  if ((created === 'yes' || created === 'no') && contact) {
     const call = amoCallsStore.calls.find(c => c.id === id);
-    if (!call || attemptsLeft <= 0) return;
-    attemptsLeft--;
-    const contact = await contactsStore.findContactByPhone(phone);
-    if (contact !== null && contact.contact_page_link) {
-      setContactInfo(id, contact);
-      return;
+    if (call) call.contact = { contact_page_link: contact.contact_page_link, name: contact.name };
+    if (created === 'yes') {
+      contactsStore.openWidgetPage(contact.contact_page_link);
+      globalsStore.isModalOpen = false;
     }
-    retryTimeout = setTimeout(retry, 1000);
-  };
-
-  retry();
-}
-
-function setContactInfo(id, contact) {
-  const theCall = amoCallsStore.calls.find(call => call.id === id);
-  if (theCall) {
-    theCall.contact = {
-      contact_page_link: contact.contact_page_link,
-      name: contact.name,
-    };
   }
 }
 
 function CallTo(number) {
-  if (!number) {
-    logger.warn('CallTo: no number provided');
-    return;
-  }
-  sipStore.makeCall(number);
+  if (number) sipStore.makeCall(number);
 }
 
 onMounted(() => {
   amoCallsStore.fetchCalls();
   amoCallsStore.reAddContactInfo();
-});
-
-onBeforeUnmount(() => {
-  clearTimeout(retryTimeout);
 });
 </script>
 

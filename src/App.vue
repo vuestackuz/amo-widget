@@ -1,18 +1,20 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { onMounted, onBeforeUnmount } from 'vue';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
 import CallControlPanel from './components/panel/calls/CallControlPanel.vue';
 import { useAmocrmStore } from './stores/amocrm.store';
 import { useSipStore } from './stores/sip.store';
 import { useSipWSStore } from './stores/sip-ws.store';
+import { useGlobalsStore } from './stores/globals.store';
 import { storeToRefs } from 'pinia';
 
 const amocrmStore = useAmocrmStore();
 const sipStore = useSipStore();
 const sipWSStore = useSipWSStore();
+const globalsStore = useGlobalsStore();
 const { isError } = storeToRefs(amocrmStore);
-const isModalOpen = ref(false);
+const { isModalOpen } = storeToRefs(globalsStore);
 
 const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;

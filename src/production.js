@@ -16,6 +16,11 @@ const Widget = {
     render(widget) {
         window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
         window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
+        console.log('render callback');
+        const wrapperElement = document.querySelector('#utel-widget-app');
+        if (wrapperElement) {
+            return true;
+        }
         const appElement = document.createElement('div');
         appElement.setAttribute('id', 'utel-widget-app');
         this.appElement = appElement;

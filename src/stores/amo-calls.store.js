@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useContactsStore } from './contacts.store';
-import { getCallsFromStorage, saveCallToStorage } from '../utils/callStorage';
+import { getCallsFromStorage, saveCallToStorage, updateCallInStorage } from '../utils/callStorage';
 
 const CALL_STATUSES = {
   1: 'Входящий',
@@ -14,6 +14,7 @@ const CALL_STATUSES = {
 
 export const useAmoCallsStore = defineStore('amoCalls', () => {
   const calls = ref([]);
+  let contactsEnriched = false;
 
   const formattedCalls = computed(() =>
     calls.value.map((call) => ({
@@ -38,15 +39,34 @@ export const useAmoCallsStore = defineStore('amoCalls', () => {
   }
 
   async function reAddContactInfo() {
+    if (contactsEnriched) return;
+    contactsEnriched = true;
+
     const contactsStore = useContactsStore();
+
+    // Collect unique phone numbers that need lookup
+    const uniquePhones = [...new Set(
+      calls.value
+        .filter(c => c.contact === null && c.number)
+        .map(c => c.number)
+    )];
+
+    // Fetch all unique phones in parallel
+    const results = await Promise.all(
+      uniquePhones.map(phone => contactsStore.findContactByPhone(phone))
+    );
+
+    const phoneToContact = new Map(
+      uniquePhones.map((phone, i) => [phone, results[i]])
+    );
+
+    // Apply results and persist enriched contacts to storage
     for (const call of calls.value) {
       if (call.contact === null && call.number) {
-        const contact = await contactsStore.findContactByPhone(call.number);
+        const contact = phoneToContact.get(call.number);
         if (contact?.contact_page_link) {
-          call.contact = {
-            contact_page_link: contact.contact_page_link,
-            name: contact.name,
-          };
+          call.contact = { contact_page_link: contact.contact_page_link, name: contact.name };
+          updateCallInStorage(call.id, { contact: call.contact });
         }
       }
     }

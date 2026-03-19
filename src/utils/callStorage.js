@@ -25,3 +25,15 @@ export function getCallsFromStorage() {
     return [];
   }
 }
+
+export function updateCallInStorage(id, patch) {
+  const calls = getCallsFromStorage();
+  const idx = calls.findIndex(c => c.id === id);
+  if (idx === -1) return;
+  calls[idx] = { ...calls[idx], ...patch };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(calls));
+  } catch (e) {
+    console.warn('[CallStorage] Failed to update:', e);
+  }
+}
