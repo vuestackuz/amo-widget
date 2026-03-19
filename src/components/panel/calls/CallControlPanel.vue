@@ -33,7 +33,7 @@
   
   <style lang="scss" scoped>
   #utel-calls-component {
-    position: fixed;
+    position: relative;
     bottom: calc(100% + 12px);
     height: auto;
     min-height: 30px;

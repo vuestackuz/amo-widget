@@ -4,11 +4,9 @@ import './assets/amocrm.css';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
+import { useSipStore } from './stores/sip.store';
 
-// const app = createApp(App);
-// app.use(store);
-// app.mount('#app');
-
+let _pinia = null;
 
 const Widget = {
     currnetArea: "",
@@ -27,15 +25,19 @@ const Widget = {
         console.log('render callback', widget.get_settings());
         const container = $("body");
         $(container).append(this.appElement);
-        const pinia = createPinia();
+        _pinia = createPinia();
         const app = createApp(App);
-        app.use(pinia);
+        app.use(_pinia);
         window.vue = app;
         app.mount('#utel-widget-app');
         return true;
     },
     init(widget) {
         this.currnetArea = widget.system.area;
+        widget.add_action('phone', function (data) {
+            if (!data?.value || !_pinia) return;
+            useSipStore(_pinia).makeCall(data.value);
+        });
         console.log('init callback');
         return true;
     },
