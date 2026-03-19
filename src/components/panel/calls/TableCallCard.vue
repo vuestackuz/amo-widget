@@ -1,5 +1,13 @@
 <template>
-  <div class="call-card" :id="'table-call-' + props.session.id">
+  <div
+    class="call-card"
+    :id="'table-call-' + props.session.id"
+    :class="{
+      'status--ringing': !props.session.isAccepted,
+      'status--active': props.session.isAccepted && !props.session.isOnHold && !props.session.isRemoteHold,
+      'status--hold': props.session.isAccepted && (props.session.isOnHold || props.session.isRemoteHold),
+    }"
+  >
     <CallCardPopout
       :show-dial="showDial"
       :session="props.session"
@@ -77,7 +85,12 @@ onBeforeUnmount(() => {
 .call-card {
   position: relative;
   width: 100%;
-  background-color: black;
+  background-color: hsl(0, 0%, 8%);
+  transition: background-color 0.3s ease;
+
+  &.status--ringing  { background-color: hsl(45, 100%, 35%); }
+  &.status--active   { background-color: hsl(158, 55%, 30%); }
+  &.status--hold     { background-color: hsl(210, 70%, 35%); }
   --border-radius: 4px;
   border-radius: var(--border-radius);
   * {

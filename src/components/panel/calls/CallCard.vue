@@ -102,9 +102,6 @@ onBeforeUnmount(() => {
     color: white;
     user-select: none;
   }
-  &:has(.left-side-indicator.active) {
-    z-index: 10300 !important;
-  }
 
   .left-side-indicator {
     position: absolute;

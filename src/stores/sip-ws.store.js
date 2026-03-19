@@ -90,14 +90,44 @@ export const useSipWSStore = defineStore('sipWS', () => {
     return null;
   }
 
+  function resolveCallStatus(direction, isAccepted) {
+    return direction === 'outgoing' ? (isAccepted ? 4 : 3) : (isAccepted ? 1 : 2);
+  }
+
+  function closePassiveCall(id) {
+    const sess = passiveCalls.value[id];
+    if (!sess) return;
+
+    sess.endTime = new Date();
+    clearInterval(sess.timer);
+    sess.timer = null;
+    sess.duration = Math.max(
+      0,
+      Math.floor((sess.endTime.getTime() - new Date(sess.startTime).getTime()) / 1000)
+    );
+
+    useAmoCallsStore().addCall({
+      id,
+      direction: sess.direction,
+      number: sess.number,
+      displayName: sess.displayName,
+      duration: sess.duration,
+      startTime: new Date(sess.startTime).toISOString(),
+      endTime: sess.endTime.toISOString(),
+      status: resolveCallStatus(sess.direction, sess.isAccepted),
+      contact: sess.contact,
+    });
+
+    delete passiveCalls.value[id];
+  }
+
   async function handleEvent(e, status) {
     const id = e?.call?.id;
     const check = sipCheck(e);
     if (!id || !check) return;
 
     const [number, direction] = check;
-    const contactsStore = useContactsStore();
-    const contact = await contactsStore.findContactByPhone(number);
+    const contact = await useContactsStore().findContactByPhone(number);
     const contactInfo = contact
       ? { contact_page_link: contact.contact_page_link, name: contact.name }
       : null;
@@ -129,40 +159,15 @@ export const useSipWSStore = defineStore('sipWS', () => {
         passiveCalls.value[id].contact = contactInfo;
       }
     } else {
-      // Call ended
-      if (!passiveCalls.value[id]) return;
+      closePassiveCall(id);
+    }
+  }
 
-      const sess = passiveCalls.value[id];
-      sess.endTime = new Date();
-
-      if (sess.timer) {
-        clearInterval(sess.timer);
-        sess.timer = null;
-      }
-
-      sess.duration = Math.max(
-        0,
-        Math.floor((sess.endTime.getTime() - new Date(sess.startTime).getTime()) / 1000)
-      );
-
-      const isAccepted = sess.isAccepted;
-      let callStatus;
-      if (direction === 'outgoing') callStatus = isAccepted ? 4 : 3;
-      else callStatus = isAccepted ? 1 : 2;
-
-      useAmoCallsStore().addCall({
-        id,
-        direction: sess.direction,
-        number: sess.number,
-        displayName: sess.displayName,
-        duration: sess.duration,
-        startTime: new Date(sess.startTime).toISOString(),
-        endTime: sess.endTime.toISOString(),
-        status: callStatus,
-        contact: contactInfo,
-      });
-
-      delete passiveCalls.value[id];
+  function handleBlindTransferred(e) {
+    const attached = useAmocrmStore().sipUser?.attached;
+    const caller = e?.channel?.caller?.number;
+    if (Number(caller) === attached) {
+      closePassiveCall(e?.call?.id);
     }
   }
 
@@ -183,6 +188,7 @@ export const useSipWSStore = defineStore('sipWS', () => {
       .on('App\\Events\\Webhook\\CallStarted',  (e) => handleEvent(e, 'new_call'))
       .on('App\\Events\\Webhook\\DialStarted',   (e) => handleEvent(e, 'calling'))
       .on('App\\Events\\Webhook\\DialAnswered',  (e) => handleEvent(e, 'answered'))
+      .on('App\\Events\\Webhook\\BlindTransferred', (e) => handleBlindTransferred(e))
       .on('App\\Events\\Webhook\\DialEnded',     (e) => handleEvent(e, null))
       .on('App\\Events\\Webhook\\CallSaved',     (e) => handleEvent(e, null))
       .on('App\\Events\\Webhook\\CallEnded',     (e) => handleEvent(e, null));
