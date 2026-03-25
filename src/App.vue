@@ -14,9 +14,17 @@ const sipStore = useSipStore();
 const sipWSStore = useSipWSStore();
 const globalsStore = useGlobalsStore();
 const { isError } = storeToRefs(amocrmStore);
-const { isModalOpen } = storeToRefs(globalsStore);
+const { isModalOpen, isSettingsReady } = storeToRefs(globalsStore);
 
 const toggleModal = () => {
+  if (!isSettingsReady.value) {
+    AMOCRM.notifications.show_message({
+      header: 'Utel Widget',
+      text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+      type: 'error',
+    });
+    return;
+  }
   isModalOpen.value = !isModalOpen.value;
 };
 
