@@ -11,21 +11,42 @@ let _pinia = null;
 
 function fetchSettings(widget) {
     const currentUser = widget.system.amouser;
-    widget.crm_get(`https://amocrm.utel.uz/api/lookup/${currentUser}`, (response) => {
-        if (!response || !response.domain || !response.token) {
-            AMOCRM.notifications.show_message({
-                header: 'Utel Widget',
-                text: 'Не удалось загрузить настройки виджета: некорректный ответ',
-                type: 'error',
-            });
-            return;
+    console.log(currentUser);
+    console.log(widget.crm_post);
+    widget.crm_post(
+        `https://amocrm.utel.uz/api/lookup/${currentUser}`,
+        {},
+        (response) => {
+            let data;
+            try {
+                data = JSON.parse(response);
+            } catch (e) {
+                AMOCRM.notifications.show_message({
+                    header: 'Utel Widget',
+                    text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+                    type: 'error',
+                });
+                return;
+            }
+            if (!data || !data.domain || !data.token) {
+                AMOCRM.notifications.show_message({
+                    header: 'Utel Widget',
+                    text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+                    type: 'error',
+                });
+                return;
+            }
+            const { domain, token } = data;
+            window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain, token };
+            sessionStorage.setItem('utel-widget-domain', domain);
+            sessionStorage.setItem('utel-widget-token', token);
+            useGlobalsStore(_pinia).isSettingsReady = true;
+        },
+        'text',
+        (error) => {
+            console.log('error', error);
         }
-        const { domain, token } = response;
-        window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain, token };
-        sessionStorage.setItem('utel-widget-domain', domain);
-        sessionStorage.setItem('utel-widget-token', token);
-        useGlobalsStore(_pinia).isSettingsReady = true;
-    });
+    );
 }
 
 const Widget = {
