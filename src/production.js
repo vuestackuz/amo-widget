@@ -34,11 +34,46 @@ const Widget = {
     },
     init(widget) {
         this.currnetArea = widget.system.area;
+        const self = widget;
         widget.add_action('phone', function (data) {
             if (!data?.value || !_pinia) return;
-            useSipStore(_pinia).makeCall(data.value);
+            const sipStore = useSipStore(_pinia);
+            if (sipStore.hasCredential) {
+                sipStore.makeCall(data.value);
+            } else {
+                const settings = window.__AMO_UTEL_WIDGET_SETTINGS__;
+                self.crm_post(
+                    settings.domain + 'integration/amocrm/widget/originate',
+                    {
+                        token: settings.token,
+                        call_to: data.value,
+                        user_id: AMOCRM.constant('user').id,
+                    },
+                    function (response) {
+                        let result;
+                        try {
+                            result = JSON.parse(response);
+                        } catch (e) {
+                            AMOCRM.notifications.add_error({
+                                header: 'Error',
+                                text: response,
+                                date: Math.ceil(Date.now() / 1000),
+                            });
+                            return;
+                        }
+                        if (!result.success) {
+                            AMOCRM.notifications.add_error({
+                                header: 'Error',
+                                text: result.message,
+                                date: Math.ceil(Date.now() / 1000),
+                            });
+                        }
+                    },
+                    'text',
+                    function () {}
+                );
+            }
         });
-        console.log('init callback');
         return true;
     },
     bind_actions(widget) {
