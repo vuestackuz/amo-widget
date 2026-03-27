@@ -4,6 +4,7 @@ import './assets/amocrm.css';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
+import axios from 'axios';
 import { useSipStore } from './stores/sip.store';
 
 let _pinia = null;
@@ -34,7 +35,6 @@ const Widget = {
     },
     init(widget) {
         this.currnetArea = widget.system.area;
-        const self = widget;
         widget.add_action('phone', function (data) {
             if (!data?.value || !_pinia) return;
             const sipStore = useSipStore(_pinia);
@@ -42,36 +42,36 @@ const Widget = {
                 sipStore.makeCall(data.value);
             } else {
                 const settings = window.__AMO_UTEL_WIDGET_SETTINGS__;
-                self.crm_post(
-                    settings.domain + 'integration/amocrm/widget/originate',
+                const amoCRMUserId = AMOCRM.constant('user').id;
+                axios.post(
+                    settings.domain + '/api/v1/integration/amocrm/widget/originate',
                     {
-                        token: settings.token,
-                        call_to: data.value,
-                        user_id: AMOCRM.constant('user').id,
+                        name: data?.model?.name,
+                        exten: data.value
                     },
-                    function (response) {
-                        let result;
-                        try {
-                            result = JSON.parse(response);
-                        } catch (e) {
-                            AMOCRM.notifications.add_error({
-                                header: 'Error',
-                                text: response,
-                                date: Math.ceil(Date.now() / 1000),
-                            });
-                            return;
+                    {
+                        headers: {
+                            Authorization: `Bearer ${settings.token}`,
+                            'Content-Type': 'application/json',
+                            'Amocrm-User-Id': amoCRMUserId,
                         }
-                        if (!result.success) {
-                            AMOCRM.notifications.add_error({
-                                header: 'Error',
-                                text: result.message,
-                                date: Math.ceil(Date.now() / 1000),
-                            });
-                        }
-                    },
-                    'text',
-                    function () {}
-                );
+                    }
+                ).then((response) => {
+                    const result = response.data;
+                    if (!result.success) {
+                        AMOCRM.notifications.add_error({
+                            header: 'Error',
+                            text: result.message,
+                            date: Math.ceil(Date.now() / 1000),
+                        });
+                    }
+                }).catch((error) => {
+                    AMOCRM.notifications.add_error({
+                        header: 'Error',
+                        text: error.message,
+                        date: Math.ceil(Date.now() / 1000),
+                    });
+                });
             }
         });
         return true;
