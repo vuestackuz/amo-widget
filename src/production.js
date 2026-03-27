@@ -81,6 +81,10 @@ const Widget = {
         return true;
     },
     settings(widget) {
+      const container = $(".widget-settings .widget_settings_block");
+      const p = document.createElement('p');
+      p.textContent = 'Добро пожаловать в Utel Widget';
+      container.html(p);
         return true;
     },
     onSave(widget) {
