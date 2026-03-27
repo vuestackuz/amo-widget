@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue';
+import axios from 'axios';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
 import CallControlPanel from './components/panel/calls/CallControlPanel.vue';
@@ -8,12 +9,12 @@ import { useSipStore } from './stores/sip.store';
 import { useSipWSStore } from './stores/sip-ws.store';
 import { useGlobalsStore } from './stores/globals.store';
 import { storeToRefs } from 'pinia';
+import api from './api/axios';
 
 const amocrmStore = useAmocrmStore();
 const sipStore = useSipStore();
 const sipWSStore = useSipWSStore();
 const globalsStore = useGlobalsStore();
-const { isError } = storeToRefs(amocrmStore);
 const { isModalOpen, isSettingsReady } = storeToRefs(globalsStore);
 
 const toggleModal = () => {
@@ -28,6 +29,41 @@ const toggleModal = () => {
   isModalOpen.value = !isModalOpen.value;
 };
 
+async function fetchSettings() {
+  const amouser = window.__AMO_UTEL_WIDGET_SYSTEM__?.amouser;
+  try {
+    const { data } = await axios.get(`https://amocrm.utel.uz/api/lookup/${amouser}`, {
+      headers: { 'User-Agent': 'utel-widget' },
+    });
+    if (!data?.domain || !data?.token) {
+      AMOCRM.notifications.show_message({
+        header: 'Utel Widget',
+        text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+        type: 'error',
+      });
+      return false;
+    }
+    window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: data.domain, token: data.token };
+    sessionStorage.setItem('utel-widget-domain', data.domain);
+    sessionStorage.setItem('utel-widget-token', data.token);
+    return true;
+  } catch {
+    AMOCRM.notifications.show_message({
+      header: 'Utel Widget',
+      text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+      type: 'error',
+    });
+    return false;
+  }
+}
+
+async function onUnauthorized() {
+  sessionStorage.removeItem('utel-widget-domain');
+  sessionStorage.removeItem('utel-widget-token');
+  isSettingsReady.value = false;
+  await fetchSettings();
+}
+
 function onBeforeUnload(e) {
   if (!sipStore.liveCalls) return;
   sipStore.holdAllCalls();
@@ -35,20 +71,40 @@ function onBeforeUnload(e) {
 }
 
 onMounted(async () => {
-  await amocrmStore.fetchAmocrmInfo();
-  if (!sipStore.hasAttached) {
-    return
+  const cachedDomain = sessionStorage.getItem('utel-widget-domain');
+  const cachedToken = sessionStorage.getItem('utel-widget-token');
+
+  if (cachedDomain && cachedToken) {
+    window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: cachedDomain, token: cachedToken };
+    isSettingsReady.value = true;
+  } else {
+    const ok = await fetchSettings();
+    if (!ok) return;
+    isSettingsReady.value = true;
   }
+
+  window.addEventListener('utel-widget:unauthorized', onUnauthorized, { once: true });
+
+  try {
+    const response = await api.get('/amocrm/widget/info');
+    amocrmStore.amocrmInfo = response.result;
+  } catch {
+    return;
+  }
+
+  if (!sipStore.hasAttached) return;
+
   if (sipStore.hasCredential) {
     sipStore.initSip();
   } else {
     sipWSStore.init();
-  } 
+  }
   window.addEventListener('beforeunload', onBeforeUnload);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', onBeforeUnload);
+  window.removeEventListener('utel-widget:unauthorized', onUnauthorized);
 });
 </script>
 <template>

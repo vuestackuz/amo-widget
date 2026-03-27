@@ -5,49 +5,8 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import { useSipStore } from './stores/sip.store';
-import { useGlobalsStore } from './stores/globals.store';
 
 let _pinia = null;
-
-function fetchSettings(widget) {
-    const currentUser = widget.system.amouser;
-    console.log(currentUser);
-    console.log(widget.crm_post);
-    widget.crm_post(
-        `https://amocrm.utel.uz/api/lookup/${currentUser}`,
-        {},
-        (response) => {
-            let data;
-            try {
-                data = JSON.parse(response);
-            } catch (e) {
-                AMOCRM.notifications.show_message({
-                    header: 'Utel Widget',
-                    text: 'Не удалось загрузить настройки виджета: некорректный ответ',
-                    type: 'error',
-                });
-                return;
-            }
-            if (!data || !data.domain || !data.token) {
-                AMOCRM.notifications.show_message({
-                    header: 'Utel Widget',
-                    text: 'Не удалось загрузить настройки виджета: некорректный ответ',
-                    type: 'error',
-                });
-                return;
-            }
-            const { domain, token } = data;
-            window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain, token };
-            sessionStorage.setItem('utel-widget-domain', domain);
-            sessionStorage.setItem('utel-widget-token', token);
-            useGlobalsStore(_pinia).isSettingsReady = true;
-        },
-        'text',
-        (error) => {
-            console.log('error', error);
-        }
-    );
-}
 
 const Widget = {
     currnetArea: "",
@@ -79,21 +38,7 @@ const Widget = {
             if (!data?.value || !_pinia) return;
             useSipStore(_pinia).makeCall(data.value);
         });
-        const cachedDomain = sessionStorage.getItem('utel-widget-domain');
-        const cachedToken = sessionStorage.getItem('utel-widget-token');
-        if (cachedDomain && cachedToken) {
-            window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: cachedDomain, token: cachedToken };
-            useGlobalsStore(_pinia).isSettingsReady = true;
-        } else {
-            fetchSettings(widget);
-        }
-        window.addEventListener('utel-widget:unauthorized', () => {
-            sessionStorage.removeItem('utel-widget-domain');
-            sessionStorage.removeItem('utel-widget-token');
-            useGlobalsStore(_pinia).isSettingsReady = false;
-            fetchSettings(widget);
-        }, { once: true });
-         return true;
+        return true;
     },
     bind_actions(widget) {
         console.log('bind_actions callback');
