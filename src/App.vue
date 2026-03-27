@@ -30,12 +30,13 @@ const toggleModal = () => {
 };
 
 async function fetchSettings() {
-  const amouser = window.__AMO_UTEL_WIDGET_SYSTEM__?.amouser;
+  // use default amouser for dev
+  const amouser = window.location.hostname; // dev: 'rustamidastan0414.amocrm.ru'
   try {
-    const { data } = await axios.get(`https://amocrm.utel.uz/api/lookup/${amouser}`, {
+    const { data } = await axios.get(`https://amocrm.utel.uz/api/lookup?amocrm_base_domain=${amouser}`, {
       headers: { 'User-Agent': 'utel-widget' },
     });
-    if (!data?.domain || !data?.token) {
+    if (!data?.domain || !data?.utel_token && AMOCRM) {
       AMOCRM.notifications.show_message({
         header: 'Utel Widget',
         text: 'Не удалось загрузить настройки виджета: некорректный ответ',
@@ -43,16 +44,18 @@ async function fetchSettings() {
       });
       return false;
     }
-    window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: data.domain, token: data.token };
+    window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: data.domain, token: data.utel_token };
     sessionStorage.setItem('utel-widget-domain', data.domain);
-    sessionStorage.setItem('utel-widget-token', data.token);
+    sessionStorage.setItem('utel-widget-token', data.utel_token);
     return true;
   } catch {
+    if (AMOCRM) {
     AMOCRM.notifications.show_message({
       header: 'Utel Widget',
-      text: 'Не удалось загрузить настройки виджета: некорректный ответ',
-      type: 'error',
-    });
+        text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+        type: 'error',
+      });
+    }
     return false;
   }
 }
