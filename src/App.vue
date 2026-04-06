@@ -44,7 +44,7 @@ async function fetchSettings() {
       });
       return false;
     }
-    window.__AMO_UTEL_WIDGET_SETTINGS__ = { domain: data.domain, token: data.utel_token };
+    window.__AMO_UTEL_WIDGET_SETTINGS__ = { ...window.__AMO_UTEL_WIDGET_SETTINGS__, domain: data.domain, token: data.utel_token };
     sessionStorage.setItem('utel-widget-domain', data.domain);
     sessionStorage.setItem('utel-widget-token', data.utel_token);
     return true;
