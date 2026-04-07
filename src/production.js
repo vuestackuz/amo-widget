@@ -15,7 +15,6 @@ const Widget = {
     render(widget) {
         window.__AMO_UTEL_WIDGET_SETTINGS__ = widget.get_settings();
         window.__AMO_UTEL_WIDGET_SYSTEM__ = widget.system;
-        console.log('render callback');
         const wrapperElement = document.querySelector('#utel-widget-app');
         if (wrapperElement) {
             return true;
@@ -23,7 +22,6 @@ const Widget = {
         const appElement = document.createElement('div');
         appElement.setAttribute('id', 'utel-widget-app');
         this.appElement = appElement;
-        console.log('render callback', widget.get_settings());
         const container = $("body");
         $(container).append(this.appElement);
         _pinia = createPinia();
@@ -77,7 +75,6 @@ const Widget = {
         return true;
     },
     bind_actions(widget) {
-        console.log('bind_actions callback');
         return true;
     },
     settings(widget) {
@@ -91,16 +88,12 @@ const Widget = {
         return true;
     },
     destroy(widget) {
-        console.log("destroy");
     },
     contacts_selected(widget) {
-        console.log("conatct_selected");
     },
     leads_selected(widget) {
-        console.log("lead_selected");
     },
     tasks_selected(widget) {
-        console.log("task_selected");
     }
 };
 
