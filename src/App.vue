@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue';
+import { onMounted, onBeforeUnmount, h } from 'vue';
 import axios from 'axios';
 import ModalTriggerButton from './components/ModalTriggerButton.vue';
 import Panel from './components/panel/index.vue';
@@ -10,16 +10,27 @@ import { useSipWSStore } from './stores/sip-ws.store';
 import { useGlobalsStore } from './stores/globals.store';
 import { storeToRefs } from 'pinia';
 import api from './api/axios';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const amocrmStore = useAmocrmStore();
 const sipStore = useSipStore();
 const sipWSStore = useSipWSStore();
 const globalsStore = useGlobalsStore();
 const { isModalOpen, isSettingsReady } = storeToRefs(globalsStore);
+function notify({ header, text, type = 'info' }) {
+  const content = header
+    ? () => h('div', [
+        h('strong', { style: 'font-weight: 700; display: block;' }, header),
+        h('span', { style: 'font-weight: 400;' }, text),
+      ])
+    : text;
+  toast(content, { type, autoClose: 4000, position: toast.POSITION.BOTTOM_RIGHT });
+}
 
 const toggleModal = () => {
   if (!isSettingsReady.value) {
-    AMOCRM.notifications.show_message({
+    notify({
       header: 'Utel Widget',
       text: 'Не удалось загрузить настройки виджета: некорректный ответ',
       type: 'error',
@@ -31,13 +42,13 @@ const toggleModal = () => {
 
 async function fetchSettings() {
   // use default amouser for dev
-  const amouser = window.location.hostname; // dev: 'rustamidastan0414.amocrm.ru'
+  const amouser = window.location.hostname;
   try {
     const { data } = await axios.get(`https://amocrm.utel.uz/api/lookup?amocrm_base_domain=${amouser}`, {
       headers: { 'User-Agent': 'utel-widget' },
     });
-    if (!data?.domain || !data?.utel_token && AMOCRM) {
-      AMOCRM.notifications.show_message({
+    if (!data?.domain || !data?.utel_token) {
+      notify({
         header: 'Utel Widget',
         text: 'Не удалось загрузить настройки виджета: некорректный ответ',
         type: 'error',
@@ -49,13 +60,37 @@ async function fetchSettings() {
     sessionStorage.setItem('utel-widget-token', data.utel_token);
     return true;
   } catch {
-    if (AMOCRM) {
-    AMOCRM.notifications.show_message({
+    notify({
       header: 'Utel Widget',
-        text: 'Не удалось загрузить настройки виджета: некорректный ответ',
-        type: 'error',
-      });
+      text: 'Не удалось загрузить настройки виджета: некорректный ответ',
+      type: 'error',
+    });
+    return false;
+  }
+}
+
+async function fetchWidgetInfo({ isRetry = false } = {}) {
+  try {
+    const response = await api.get('/amocrm/widget/info');
+    amocrmStore.amocrmInfo = response.result;
+    return true;
+  } catch (error) {
+    if (!isRetry) {
+      sessionStorage.removeItem('utel-widget-domain');
+      sessionStorage.removeItem('utel-widget-token');
+      isSettingsReady.value = false;
+      const ok = await fetchSettings();
+      if (!ok) return false;
+      isSettingsReady.value = true;
+      return fetchWidgetInfo({ isRetry: true });
     }
+    console.error(error);
+    notify({
+      header: 'Utel Widget',
+      text: 'Не удалось загрузить информацию о Amocrm: ' + error.message,
+      type: 'error',
+    });
+    isSettingsReady.value = false;
     return false;
   }
 }
@@ -88,12 +123,8 @@ onMounted(async () => {
 
   window.addEventListener('utel-widget:unauthorized', onUnauthorized, { once: true });
 
-  try {
-    const response = await api.get('/amocrm/widget/info');
-    amocrmStore.amocrmInfo = response.result;
-  } catch {
-    return;
-  }
+  const ok = await fetchWidgetInfo();
+  if (!ok) return;
 
   if (!sipStore.hasAttached) return;
 

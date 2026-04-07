@@ -12,6 +12,7 @@ import { useContactsStore } from './contacts.store';
 export const useSipWSStore = defineStore('sipWS', () => {
   const passiveCalls = ref({});
   const echo = ref(null);
+  const isConnecting = ref(false);
 
   window.Pusher = Pusher;
 
@@ -34,6 +35,7 @@ export const useSipWSStore = defineStore('sipWS', () => {
       }
 
       console.log('[SipWS] Connecting to ws for Sip statuses...');
+      isConnecting.value = true;
 
       echo.value = new Echo({
         broadcaster: 'reverb',
@@ -64,6 +66,10 @@ export const useSipWSStore = defineStore('sipWS', () => {
           },
         }),
       });
+
+      echo.value.connector.pusher.connection.bind('connected', () => { isConnecting.value = false; });
+      echo.value.connector.pusher.connection.bind('failed', () => { isConnecting.value = false; });
+      echo.value.connector.pusher.connection.bind('unavailable', () => { isConnecting.value = false; });
     }
   }
 
@@ -204,5 +210,5 @@ export const useSipWSStore = defineStore('sipWS', () => {
     passiveCalls.value = {};
   }
 
-  return { echo, passiveCalls, init, disconnect };
+  return { echo, passiveCalls, isConnecting, init, disconnect };
 });

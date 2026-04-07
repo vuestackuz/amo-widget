@@ -43,6 +43,10 @@ archive.on('error', function (err) {
 
 archive.pipe(output);
 
-archive.directory(widgetFolder, false);
+archive.directory(widgetFolder, false, (entry) => {
+    // Exclude .gitkeep files from the zip
+    if (entry.name.endsWith('.gitkeep')) return false;
+    return entry;
+});
 
 archive.finalize();

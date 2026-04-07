@@ -1,12 +1,16 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useSipStore } from '../stores/sip.store';
+import { useSipWSStore } from '../stores/sip-ws.store';
 import { useUtelSipUserStore } from '../stores/sip-user.store';
 
 const emit = defineEmits(['open']);
 
 const sipStore = useSipStore();
+const sipWSStore = useSipWSStore();
 const sipUserStore = useUtelSipUserStore();
+
+const isConnecting = computed(() => sipStore.isConnecting || sipWSStore.isConnecting);
 
 const attachedNumber = computed(() => sipUserStore.sipUser?.attached ?? '-');
 const badgeClass = computed(() => {
@@ -132,11 +136,24 @@ onBeforeUnmount(() => {
     @mousedown="onMouseDown"
   >
     <span
-      v-if="attachedNumber"
+      v-if="attachedNumber || isConnecting"
       class="attached-number"
       :class="badgeClass"
-    >{{ attachedNumber }}</span>
+    >
+      <svg
+        v-if="isConnecting"
+        class="spinner"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" />
+        <path d="M12 2a10 10 0 0 1 10 10" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+      </svg>
+      {{ attachedNumber }}
+    </span>
     <svg
+      v-if="true"
       id="Layer_2"
       data-name="Layer 2"
       xmlns="http://www.w3.org/2000/svg"
@@ -193,6 +210,10 @@ onBeforeUnmount(() => {
 
 .attached-number {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   text-align: center;
   font-size: 14px;
   font-weight: 700;
@@ -225,5 +246,15 @@ svg {
   .cls-1 {
     fill: var(--utel-blue);
   }
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  animation: utel-spin 0.8s linear infinite;
+}
+
+@keyframes utel-spin {
+  to { transform: rotate(360deg); }
 }
 </style>

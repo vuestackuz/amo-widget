@@ -13,6 +13,7 @@ export const useSipStore = defineStore('sip', () => {
   let ua = null;
 
   const isRegistered = ref(false);
+  const isConnecting = ref(false);
   const dnd = ref(false);
   const multiChannel = ref(true);
   const order = ref(0);
@@ -68,12 +69,15 @@ export const useSipStore = defineStore('sip', () => {
       user_agent: 'AmoCRM-Widget',
     });
 
-    ua.on('connected', () => {});
-    ua.on('disconnected', () => {});
-    ua.on('registered', () => { isRegistered.value = true; });
+    isConnecting.value = true;
+
+    ua.on('connected', () => { playAudio(audio.connected) });
+    ua.on('disconnected', () => { isConnecting.value = false; playAudio(audio.disconnected) });
+    ua.on('registered', () => { isRegistered.value = true; isConnecting.value = false; });
     ua.on('unregistered', () => { isRegistered.value = false; });
     ua.on('registrationFailed', (e) => {
       isRegistered.value = false;
+      isConnecting.value = false;
       console.error('[SIP] Registration failed:', e.cause);
     });
 
@@ -319,6 +323,7 @@ export const useSipStore = defineStore('sip', () => {
     liveCalls,
     hasCredential,
     isRegistered,
+    isConnecting,
     dnd,
     setDND,
     multiChannel,
