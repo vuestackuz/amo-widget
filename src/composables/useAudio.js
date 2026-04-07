@@ -11,24 +11,13 @@ const audio = {
   disconnected: new Audio(`${BASE_URL}/disconnected.mp3`),
 };
 
-const userInteracted = new Promise((resolve) => {
-  const handler = () => {
-    resolve();
-    document.removeEventListener('click', handler, true);
-    document.removeEventListener('touchstart', handler, true);
-    document.removeEventListener('keydown', handler, true);
-  };
-  document.addEventListener('click', handler, true);
-  document.addEventListener('touchstart', handler, true);
-  document.addEventListener('keydown', handler, true);
-});
-
 function play(audioEl, loop = false) {
   if (!audioEl) return;
-  userInteracted.then(() => {
-    audioEl.currentTime = 0;
-    audioEl.loop = loop;
-    audioEl.play().catch((err) => console.warn('[Audio] Play failed:', err));
+  audioEl.currentTime = 0;
+  audioEl.loop = loop;
+  audioEl.play().catch(() => {
+    const retry = () => { audioEl.play().catch(() => {}); };
+    document.addEventListener('click', retry, { once: true, capture: true });
   });
 }
 
