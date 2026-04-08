@@ -41,7 +41,7 @@ const toggleModal = () => {
 };
 
 async function fetchSettings() {
-  // use default amouser for dev
+  // in local run project use window.location.hostname for amcrm
   const amouser = window.location.hostname;
   try {
     const { data } = await axios.get(`https://amocrm.utel.uz/api/lookup?amocrm_base_domain=${amouser}`, {
