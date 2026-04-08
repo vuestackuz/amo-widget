@@ -8,6 +8,7 @@ import { useUtelSipUserStore } from './sip-user.store';
 import { useSipStore } from './sip.store';
 import { useAmoCallsStore } from './amo-calls.store';
 import { useContactsStore } from './contacts.store';
+import { toast } from 'vue3-toastify';
 
 export const useSipWSStore = defineStore('sipWS', () => {
   const passiveCalls = ref({});
@@ -40,7 +41,7 @@ export const useSipWSStore = defineStore('sipWS', () => {
       echo.value = new Echo({
         broadcaster: 'reverb',
         key: websocket.key,
-        wsHost: hostname,
+        wsHost: websocket.host,
         wsPort: websocket.ws_port,
         wssPort: websocket.wss_port,
         forceTLS: false,
@@ -69,7 +70,9 @@ export const useSipWSStore = defineStore('sipWS', () => {
 
       echo.value.connector.pusher.connection.bind('connected', () => { isConnecting.value = false; });
       echo.value.connector.pusher.connection.bind('failed', () => { isConnecting.value = false; });
-      echo.value.connector.pusher.connection.bind('unavailable', () => { isConnecting.value = false; });
+      echo.value.connector.pusher.connection.bind('unavailable', () => { 
+        toast(`Не удалось подключиться к сокету`, { type: 'error', autoClose: 4000, position: toast.POSITION.BOTTOM_RIGHT });
+       });
     }
   }
 

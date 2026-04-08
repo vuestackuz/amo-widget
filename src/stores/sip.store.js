@@ -5,6 +5,8 @@ import { useAmocrmStore } from './amocrm.store';
 import { useAudio } from '../composables/useAudio';
 import { checkMicAccess } from '../composables/useMic';
 import { useAmoCallsStore } from './amo-calls.store';
+import { toast } from 'vue3-toastify';
+
 
 export const useSipStore = defineStore('sip', () => {
   const amocrmStore = useAmocrmStore();
@@ -54,7 +56,7 @@ export const useSipStore = defineStore('sip', () => {
     }
 
     const host = settingsDomain.replace(/^https?:\/\//, '');
-    const wsUrl = `wss://${host}:8089/ws/`;
+    const wsUrl = sipUser.webrtc_url;
     const username = sipUser.credential.username;
     const password = sipUser.credential.password;
 
@@ -72,9 +74,12 @@ export const useSipStore = defineStore('sip', () => {
     isConnecting.value = true;
 
     ua.on('connected', () => { playAudio(audio.connected) });
-    ua.on('disconnected', () => { isConnecting.value = false; playAudio(audio.disconnected) });
+    ua.on('disconnected', (e) => { 
+      playAudio(audio.disconnected); 
+      toast(`Не удалось подключиться к сокету`, { type: 'error', autoClose: 4000, position: toast.POSITION.BOTTOM_RIGHT });
+    });
     ua.on('registered', () => { isRegistered.value = true; isConnecting.value = false; });
-    ua.on('unregistered', () => { isRegistered.value = false; });
+    ua.on('unregistered', () => { isRegistered.value = false; console.log('unregistered'); });
     ua.on('registrationFailed', (e) => {
       isRegistered.value = false;
       isConnecting.value = false;
